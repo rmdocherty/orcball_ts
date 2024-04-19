@@ -1,10 +1,9 @@
 {
   "name": "orcball",
   "version": "0.0.1",
-  "description": "Webpack-Boilerplate for Phaser 3 in TypeScript",
+  "description": "Source for the orcball game",
   "keywords": [],
   "scripts": {
-    "start": "yarn run start-dev",
     "start-dev": "webpack serve --config=configs/webpack/dev.js",
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production",
@@ -29,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/digitsensitive/phaser3-typescript.git"
+    "url": "git+https://github.com/rmdocherty/orcball_ts.git"
   },
   "author": {
     "name": "rmdocherty",
@@ -37,7 +36,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/digitsensitive/phaser3-typescript/issues"
+    "url": "https://github.com/rmdocherty/orcball_ts/issues"
   },
-  "homepage": "https://github.com/digitsensitive/phaser3-typescript#readme"
+  "homepage": "https://github.com/rmdocherty/orcball_ts#readme"
 }
