@@ -22,6 +22,14 @@ class Grid {
     constructor(public h: number, public w: number) {
         this.dots = new Uint8ClampedArray(h * w);
     }
+
+    public set(x: number, y: number, val: Dot): void {
+        this.dots[p_to_i(new Point(x, y), this.w)] = val
+    }
+    public get(x: number, y: number): Dot {
+        return this.dots[p_to_i(new Point(x, y), this.w)]
+    }
+    // TODO: add setFrom fn that calls set over x0, x1, y0, y1 - use for slicing a la numpy
 }
 
 class Point {
@@ -44,11 +52,11 @@ const addMoore = (p: Point): Point[] => {
     return moore.map((m) => new Point(m.x + p.x, m.y + p.y));
 }
 
-const indexToPoint = (i: number, nx: number): Point => {
+const i_to_p = (i: number, nx: number): Point => {
     return new Point(Math.floor(i / nx), i % nx);
 }
 
-const pointToIndex = (p: Point, nx: number): number => {
+const p_to_i = (p: Point, nx: number): number => {
     return p.x * nx + p.y;
 }
 
@@ -57,5 +65,7 @@ const getDotGrid = (nx: number, ny: number): Grid => {
 }
 
 const addWalls = (dotGrid: Grid): void => {
+    dotGrid.set()
+
 
 }
