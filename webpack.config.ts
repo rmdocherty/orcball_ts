@@ -53,7 +53,7 @@ const config: webpack.Configuration = {
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/index.html'),
-      title: 'Webpack Boilerplate',
+      title: 'Orcball',
       inject: 'head'
     })
   ]
