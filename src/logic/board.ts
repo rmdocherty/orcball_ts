@@ -26,6 +26,8 @@ multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x conv
 The game can then be stored entirely based on these two objects, the current player and the ball position.
 */
 
+import { Point } from "../interfaces/shared";
+
 enum Dot {
     // state of a position on the game board
     EMPTY = 0,
@@ -66,10 +68,7 @@ class Grid {
     }
 }
 
-interface Point {
-    x: number;
-    y: number
-}
+
 
 type AdjVector = Uint8ClampedArray
 type AdjMatrix = AdjVector[]
