@@ -26,6 +26,8 @@ multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x conv
 The game can then be stored entirely based on these two objects, the current player and the ball position.
 */
 
+import { assert } from "console";
+
 enum Dot {
     // state of a position on the game board
     EMPTY = 0,
@@ -172,6 +174,9 @@ const getWallDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
             case Dot.EMPTY:
                 adj[p_to_i(n, w)] = Link.VALID;
                 break;
+            case Dot.GOAL:
+                adj[p_to_i(n, w)] = Link.VALID;
+                break;
             default:
                 null;
                 break;
@@ -184,7 +189,6 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
     const h = dotGrid.h;
     const w = dotGrid.w;
     const l = h * w;
-    console.log(l)
     // helper fn.
     const _fillInvalid = (j: number) => { return new Uint8ClampedArray(j).fill(Link.INVALID) };
     // init l Uint8 arrs of size l inside adjMat
@@ -206,8 +210,6 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
                 case Dot.WALL:
                     adjMat[idx] = getWallDotAdjVec({ x: x, y: y }, dotGrid);
                     break;
-                //default:
-                //    adjMat[idx] = _fillInvalid(l);
             }
         }
     }
@@ -219,7 +221,6 @@ const isMoveValid = (start: Point, end: Point, w: number, adjMat: AdjMatrix): bo
     const end_i = p_to_i(end, w)
 
     const val = adjMat[start_i][end_i]
-    console.log(start_i, end_i, val)
     return (val == Link.VALID)
 }
 
@@ -238,19 +239,20 @@ const printGrid = (dotGrid: Grid): void => {
     console.log(str);
 }
 
-const printAdjVec = (adjVec: AdjVector, h: number, w: number): void => {
-    const chars = ["⬜", "🟩"];
+const printAdjVec = (adjVec: AdjVector, start_idx: number, h: number, w: number): void => {
+    const chars = ["⬜", "🟩", "🟥"];
     let str = "";
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
             const idx = p_to_i({ x: x, y: y }, w);
-            const val = adjVec[idx];
+            const val = (idx != start_idx) ? adjVec[idx] : 2;
             str += chars[val];
         }
         str += "\n";
     }
     console.log(str);
 }
+
 
 export const init = (): void => {
     const startTime = performance.now()
@@ -260,15 +262,21 @@ export const init = (): void => {
     const endTime = performance.now()
     console.log(`Init in ${endTime - startTime} milliseconds`)
     printGrid(grid);
-    const inv = isMoveValid({ x: 0, y: 0 }, { x: 0, y: 1 }, grid.w, adjMat)
-    const valid = isMoveValid({ x: 6, y: 6 }, { x: 6, y: 7 }, grid.w, adjMat)
-    console.log(inv)
-    console.log(valid)
 
-    const i = p_to_i({ x: 6, y: 6 }, grid.w)
+    const moves: Point[][] = [
+        [{ x: 0, y: 0 }, { x: 0, y: 1 }],
+        [{ x: 6, y: 6 }, { x: 6, y: 7 }],
+        [{ x: 5, y: 1 }, { x: 4, y: 0 }],
+    ];
+    const cases: boolean[] = [false, true, true];
 
-    printAdjVec(adjMat[0], grid.h, grid.w)
-
-
+    let i = 0;
+    for (let mv of moves) {
+        const idx = p_to_i(mv[0], grid.w)
+        printAdjVec(adjMat[idx], idx, grid.h, grid.w)
+        const isValid = isMoveValid(mv[0], mv[1], grid.w, adjMat)
+        //assert((isValid == cases[i]));
+        i++
+    }
 
 }
