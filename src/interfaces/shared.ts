@@ -1,6 +1,9 @@
 //iphone SE dims times 2
 export const GAME_W = 375 * 2
 export const GAME_H = 667 * 2
+export const DOT_SPACING = 75
+export const DOT_SIZE = 15
+export const OFFSET: Point = { x: 30, y: 30 }
 
 export interface Point {
     x: number;
@@ -28,16 +31,16 @@ export enum Link {
 
 export enum Colours {
     LIGHT_GREY = "#bfbbae",
-    DARK_GREY = "#4f4d46",
     YELLOW = "#e3ad30",
+    DARK_GREY = "#4f4d46",
     ORANGE = "#e65000",
+    WHITE = "#ffffff",
     BROWN = "#7a450c",
 }
 
 export interface DotsConstructor {
     scene: Phaser.Scene;
-    logicX: number;
-    logicY: number;
+    logicPos: Point;
     val: Dot;
 }
 
