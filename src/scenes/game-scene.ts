@@ -20,8 +20,9 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.logicGame = new LogicGame(11, 9);
-    this.gfxDots = this.initDots(this.logicGame)
+    this.gfxDots = this.initDots(this.logicGame);
     this.ball = new Ball(this, { x: 4, y: 5 })
+    this.ball.on('hover', this.onBallHover, this)
   }
 
   initDots(game: LogicGame): GraphicDot[] {
@@ -36,5 +37,9 @@ export class GameScene extends Phaser.Scene {
       }
     }
     return dots;
+  }
+
+  onBallHover(): void {
+    console.log('foo bar');
   }
 }

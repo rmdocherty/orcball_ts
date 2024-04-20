@@ -53,6 +53,4 @@ export class GraphicDot extends Phaser.GameObjects.Container {
         this.outerDot.visible = false;
     }
 
-
-
 }
