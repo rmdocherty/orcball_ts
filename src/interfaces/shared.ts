@@ -38,6 +38,8 @@ export enum Colours {
     BROWN = "#7a450c",
 }
 
+export const valToCol = [Colours.LIGHT_GREY, Colours.YELLOW, Colours.DARK_GREY, Colours.ORANGE, Colours.WHITE]
+
 export interface DotsConstructor {
     scene: Phaser.Scene;
     logicPos: Point;
