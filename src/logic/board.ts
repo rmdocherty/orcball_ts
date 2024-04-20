@@ -275,8 +275,7 @@ export const init = (): void => {
         const idx = p_to_i(mv[0], grid.w)
         printAdjVec(adjMat[idx], idx, grid.h, grid.w)
         const isValid = isMoveValid(mv[0], mv[1], grid.w, adjMat)
-        //assert((isValid == cases[i]));
+        console.log("Should be: " + cases[i] + " is: " + isValid)
         i++
     }
-
 }
