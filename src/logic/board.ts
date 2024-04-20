@@ -149,6 +149,7 @@ const getWallDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
         switch (val) {
             case Dot.VOID:
                 null;
+                break;
             case Dot.WALL:
                 // handle bounces
                 const dx = n.x - p.x;
@@ -159,15 +160,21 @@ const getWallDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
                 switch (delta) {
                     case 1:
                         null;
+                        break;
                     case -1:
                         null;
+                        break;
                     default:
                         adj[p_to_i(n, w)] = Link.VALID;
+                        break;
                 }
+                break;
             case Dot.EMPTY:
                 adj[p_to_i(n, w)] = Link.VALID;
+                break;
             default:
                 null;
+                break;
         }
     }
     return adj
@@ -189,14 +196,18 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
             switch (val) {
                 case Dot.EMPTY:
                     adjMat[idx] = getEmptyDotAdjVec({ x: x, y: y }, dotGrid);
+                    break;
                 case Dot.VOID:
                     adjMat[idx] = _fillInvalid(l);
+                    break;
                 case Dot.GOAL:
                     adjMat[idx] = _fillInvalid(l);
+                    break;
                 case Dot.WALL:
                     adjMat[idx] = getWallDotAdjVec({ x: x, y: y }, dotGrid);
-                default:
-                    adjMat[idx] = _fillInvalid(l);
+                    break;
+                //default:
+                //    adjMat[idx] = _fillInvalid(l);
             }
         }
     }
@@ -227,21 +238,37 @@ const printGrid = (dotGrid: Grid): void => {
     console.log(str);
 }
 
+const printAdjVec = (adjVec: AdjVector, h: number, w: number): void => {
+    const chars = ["⬜", "🟩"];
+    let str = "";
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const idx = p_to_i({ x: x, y: y }, w);
+            const val = adjVec[idx];
+            str += chars[val];
+        }
+        str += "\n";
+    }
+    console.log(str);
+}
+
 export const init = (): void => {
     const startTime = performance.now()
     let grid = new Grid(11, 9);
     grid = addWalls(grid);
     let adjMat = getAdjMat(grid)
     const endTime = performance.now()
-    printGrid(grid);
     console.log(`Init in ${endTime - startTime} milliseconds`)
+    printGrid(grid);
     const inv = isMoveValid({ x: 0, y: 0 }, { x: 0, y: 1 }, grid.w, adjMat)
     const valid = isMoveValid({ x: 6, y: 6 }, { x: 6, y: 7 }, grid.w, adjMat)
     console.log(inv)
     console.log(valid)
 
     const i = p_to_i({ x: 6, y: 6 }, grid.w)
-    console.log(adjMat[i], i)
-    console.log(grid.get(5, 5))
+
+    printAdjVec(adjMat[0], grid.h, grid.w)
+
+
 
 }
