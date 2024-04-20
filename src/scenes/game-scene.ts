@@ -1,8 +1,11 @@
 import { Redhat } from '../objects/redhat';
+import { GraphicDot } from '../objects/dots';
 import { init } from '../logic/board';
+import { Dot } from '../interfaces/shared';
 
 export class GameScene extends Phaser.Scene {
   private myRedhat: Redhat;
+  private myDot: GraphicDot;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -26,6 +29,8 @@ export class GameScene extends Phaser.Scene {
       y: 300,
       texture: 'redhat'
     });
+
+    this.myDot = new GraphicDot({ scene: this, logicPos: { x: 1, y: 1 }, val: Dot.EMPTY })
 
     emitter.startFollow(this.myRedhat);
     init();
