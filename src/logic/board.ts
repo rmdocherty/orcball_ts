@@ -26,8 +26,6 @@ multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x conv
 The game can then be stored entirely based on these two objects, the current player and the ball position.
 */
 
-import { assert } from "console";
-
 enum Dot {
     // state of a position on the game board
     EMPTY = 0,
