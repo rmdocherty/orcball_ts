@@ -128,12 +128,12 @@ const getEmptyDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
     const h = dotGrid.h;
     const w = dotGrid.w;
 
-    const adj: AdjVector = new Uint8ClampedArray(h * w).fill(0);
+    const adj: AdjVector = new Uint8ClampedArray(h * w).fill(Link.INVALID);
     const neighbours = addMoore(p);
     for (let n of neighbours) {
         const val = dotGrid.get(n.x, n.y);
         if (val != Dot.VOID) {
-            adj[p_to_i(n, w)] = Link.VALID
+            adj[p_to_i(n, w)] = Link.VALID;
         }
     }
     return adj
@@ -142,7 +142,7 @@ const getEmptyDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
 const getWallDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
     const h = dotGrid.h;
     const w = dotGrid.w;
-    const adj: AdjVector = new Uint8ClampedArray(h * w).fill(0);
+    const adj: AdjVector = new Uint8ClampedArray(h * w).fill(Link.INVALID);
     const neighbours = addMoore(p);
     for (let n of neighbours) {
         const val = dotGrid.get(n.x, n.y);
@@ -177,25 +177,26 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
     const h = dotGrid.h;
     const w = dotGrid.w;
     const l = h * w;
+    console.log(l)
     // helper fn.
     const _fillInvalid = (j: number) => { return new Uint8ClampedArray(j).fill(Link.INVALID) };
     // init l Uint8 arrs of size l inside adjMat
-    const adjMat = new Array(l).map(() => _fillInvalid(l));
-    let i = 0;
+    const adjMat = new Array(l).fill(0).map(() => _fillInvalid(l));
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            const val = dotGrid.get(x, y)
+            const idx = p_to_i({ x: x, y: y }, w);
+            const val = dotGrid.get(x, y);
             switch (val) {
                 case Dot.EMPTY:
-                    adjMat[i] = getEmptyDotAdjVec({ x: x, y: y }, dotGrid);
+                    adjMat[idx] = getEmptyDotAdjVec({ x: x, y: y }, dotGrid);
                 case Dot.VOID:
-                    adjMat[i] = _fillInvalid(l);
+                    adjMat[idx] = _fillInvalid(l);
                 case Dot.GOAL:
-                    adjMat[i] = _fillInvalid(l);
+                    adjMat[idx] = _fillInvalid(l);
                 case Dot.WALL:
-                    adjMat[i] = getWallDotAdjVec({ x: x, y: y }, dotGrid);
+                    adjMat[idx] = getWallDotAdjVec({ x: x, y: y }, dotGrid);
                 default:
-                    adjMat[i] = _fillInvalid(l);
+                    adjMat[idx] = _fillInvalid(l);
             }
         }
     }
@@ -205,7 +206,9 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
 const isMoveValid = (start: Point, end: Point, w: number, adjMat: AdjMatrix): boolean => {
     const start_i = p_to_i(start, w)
     const end_i = p_to_i(end, w)
+
     const val = adjMat[start_i][end_i]
+    console.log(start_i, end_i, val)
     return (val == Link.VALID)
 }
 
@@ -225,11 +228,20 @@ const printGrid = (dotGrid: Grid): void => {
 }
 
 export const init = (): void => {
-    var startTime = performance.now()
+    const startTime = performance.now()
     let grid = new Grid(11, 9);
     grid = addWalls(grid);
     let adjMat = getAdjMat(grid)
-    var endTime = performance.now()
+    const endTime = performance.now()
     printGrid(grid);
     console.log(`Init in ${endTime - startTime} milliseconds`)
+    const inv = isMoveValid({ x: 0, y: 0 }, { x: 0, y: 1 }, grid.w, adjMat)
+    const valid = isMoveValid({ x: 6, y: 6 }, { x: 6, y: 7 }, grid.w, adjMat)
+    console.log(inv)
+    console.log(valid)
+
+    const i = p_to_i({ x: 6, y: 6 }, grid.w)
+    console.log(adjMat[i], i)
+    console.log(grid.get(5, 5))
+
 }
