@@ -1,4 +1,5 @@
 import { GameScene } from './scenes/game-scene';
+import { GAME_H, GAME_W } from './interfaces/shared';
 
 // TODO: have 2 different configs for mobile and desktop?
 export const GameConfig: Phaser.Types.Core.GameConfig = {
@@ -11,9 +12,9 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT, // maybe use RESIZE mode?
     autoCenter: Phaser.Scale.CENTER_BOTH, // CENTER_HORIZONTALLY
     parent: 'game',
-    // was both '100% - below are iphone SE dims times 2
-    width: 375 * 2,
-    height: 667 * 2
+    // was both '100%
+    width: GAME_W,
+    height: GAME_H
   },
   physics: {
     default: 'arcade',

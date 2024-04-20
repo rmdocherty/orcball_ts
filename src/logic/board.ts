@@ -26,26 +26,9 @@ multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x conv
 The game can then be stored entirely based on these two objects, the current player and the ball position.
 */
 
-import { Point } from "../interfaces/shared";
+import { Point, Dot, Link } from "../interfaces/shared";
 
-enum Dot {
-    // state of a position on the game board
-    EMPTY = 0,
-    FILLED,
-    WALL,
-    GOAL,
-    VOID
-}
 
-enum Link {
-    // State of connection between dots
-    // invalid: like a connection over two dots - can be changed by abilities later
-    // valid: possible connection at a dot
-    // filled: a connection that has been filled by ball and is now invalid - can also be changed
-    INVALID = 0,
-    VALID,
-    FILLED
-}
 
 class Grid {
     dots: Uint8ClampedArray
@@ -276,3 +259,5 @@ export const init = (): void => {
         i++
     }
 }
+
+// TODO: add LogicGame class here that tracks state

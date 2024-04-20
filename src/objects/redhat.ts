@@ -1,4 +1,4 @@
-import { ImageConstructor } from '../interfaces/image.interface';
+import { ImageConstructor } from '../interfaces/shared';
 
 // redhat seems to be an image rather than a sprite
 export class Redhat extends Phaser.GameObjects.Image {
