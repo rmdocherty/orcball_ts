@@ -1,9 +1,15 @@
+const DEFAULT_W = 9
+const DEFAULT_H = 11
+
 //iphone SE dims times 2
 export const GAME_W = 375 * 2
 export const GAME_H = 667 * 2
 export const DOT_SPACING = 75
-export const DOT_SIZE = 15
-export const OFFSET: Point = { x: 30, y: 30 }
+export const DOT_SIZE = 20
+export const OFFSET: Point = {
+    x: (GAME_W - (DEFAULT_W * DOT_SPACING)),
+    y: (GAME_H - (DEFAULT_H * DOT_SPACING)) / 2
+}
 
 export interface Point {
     x: number;
@@ -52,6 +58,8 @@ export enum Colours {
     ORANGE = "#e65000",
     WHITE = "#ffffff",
     BROWN = "#7a450c",
+    P1_COL = "#fc2c03",
+    P2_COL = "#0352fc",
 }
 
 export const valToCol = [Colours.LIGHT_GREY, Colours.YELLOW, Colours.DARK_GREY, Colours.ORANGE, Colours.WHITE]
@@ -71,3 +79,9 @@ export interface ImageConstructor {
 }
 
 
+export const toGfxPos = (logicPos: Point): Point => {
+    const l = DOT_SPACING;
+    const [ox, oy] = [OFFSET.x, OFFSET.y];
+    const gfxPos = { x: logicPos.x * l + ox, y: logicPos.y * l + oy };
+    return gfxPos;
+}

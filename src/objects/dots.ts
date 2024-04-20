@@ -1,20 +1,10 @@
-import { Point, DotsConstructor, Dot, valToCol } from "../interfaces/shared";
+import { Point, DotsConstructor, valToCol, toGfxPos } from "../interfaces/shared";
 import { DOT_SIZE, DOT_SPACING, OFFSET } from "../interfaces/shared";
-
-
-const toGfxPos = (logicPos: Point): Point => {
-    const l = DOT_SPACING;
-    const [ox, oy] = [OFFSET.x, OFFSET.y];
-    const gfxPos = { x: logicPos.x * l + ox, y: logicPos.y * l + oy };
-    return gfxPos;
-}
-
-
 
 export class GraphicDot extends Phaser.GameObjects.Container {
     logicPos: Point;
     gfxPos: Point;
-    //outerCurve: Phaser.Curves.Ellipse;
+
     innerDot: Phaser.GameObjects.Ellipse;
     outerDot: Phaser.GameObjects.Ellipse;
 
@@ -26,8 +16,9 @@ export class GraphicDot extends Phaser.GameObjects.Container {
         const r = DOT_SIZE;
         const c = Phaser.Display.Color.HexStringToColor(valToCol[params.val])
         const color = Phaser.Display.Color.GetColor32(c.red, c.green, c.blue, c.alpha)
+        const outerColor = Phaser.Display.Color.GetColor32(245, 234, 240, 100)
         this.innerDot = new Phaser.GameObjects.Ellipse(params.scene, this.gfxPos.x, this.gfxPos.y, r, r, color);
-        this.outerDot = new Phaser.GameObjects.Ellipse(params.scene, this.gfxPos.x, this.gfxPos.y, r + 10, r + 10, color);
+        this.outerDot = new Phaser.GameObjects.Ellipse(params.scene, this.gfxPos.x, this.gfxPos.y, r + 10, r + 10, outerColor, 0);
 
         this.add(this.innerDot);
         this.add(this.outerDot);

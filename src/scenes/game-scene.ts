@@ -1,10 +1,11 @@
 import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/dots';
+import { Ball } from '../objects/ball';
 import { LogicGame } from '../logic/board';
 import { Dot } from '../interfaces/shared';
 
 export class GameScene extends Phaser.Scene {
-  private myRedhat: Redhat;
+  private ball: Ball;
   private gfxDots: GraphicDot[];
   private logicGame: LogicGame;
 
@@ -20,6 +21,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.logicGame = new LogicGame(11, 9);
     this.gfxDots = this.initDots(this.logicGame)
+    this.ball = new Ball(this, { x: 4, y: 5 })
   }
 
   initDots(game: LogicGame): GraphicDot[] {
