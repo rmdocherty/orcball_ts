@@ -24,10 +24,10 @@ class Grid {
     }
 
     public set(x: number, y: number, val: Dot): void {
-        this.dots[p_to_i(new Point(x, y), this.w)] = val;
+        this.dots[p_to_i({ x: x, y: y }, this.w)] = val;
     }
     public get(x: number, y: number): Dot {
-        return this.dots[p_to_i(new Point(x, y), this.w)];
+        return this.dots[p_to_i({ x: x, y: y }, this.w)];
     }
     public setFrom(x0: number, x1: number, y0: number, y1: number, val: Dot): void {
         for (let y = y0; y < y1; y++) {
@@ -38,28 +38,33 @@ class Grid {
     }
 }
 
-class Point {
-    constructor(public x: number, public y: number) { }
+interface Point {
+    x: number;
+    y: number
 }
 
+type AdjVector = Uint8ClampedArray
+type AdjMatrix = AdjVector[]
+
 const moore: Point[] = [
-    new Point(-1, -1),
-    new Point(-1, 0),
-    new Point(-1, 1),
-    new Point(0, -1),
-    new Point(0, 1),
-    new Point(1, -1),
-    new Point(1, 0),
-    new Point(1, 1)
+    { x: -1, y: -1 },
+    { x: -1, y: 0 },
+    { x: -1, y: 1 },
+    { x: 0, y: -1 },
+    { x: 0, y: 1 },
+    { x: 1, y: -1 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 }
 ]
 
+// this could all be faster w/out instantiating a class for everything
 const addMoore = (p: Point): Point[] => {
     // list of all points in moore neighbourhood of p
-    return moore.map((m) => new Point(m.x + p.x, m.y + p.y));
+    return moore.map((m) => ({ x: m.x + p.x, y: m.y + p.y }));
 }
 
 const i_to_p = (i: number, nx: number): Point => {
-    return new Point(Math.floor(i / nx), i % nx);
+    return { x: Math.floor(i / nx), y: i % nx };
 }
 
 const p_to_i = (p: Point, nx: number): number => {
@@ -90,6 +95,68 @@ const addWalls = (dotGrid: Grid): Grid => {
     return dotGrid;
 }
 
+const getEmptyDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
+    // Look in Moore neighbourhood of dot, if neighbour is not void add link to adj row
+    const h = dotGrid.h;
+    const w = dotGrid.w;
+
+    const adj: AdjVector = new Uint8ClampedArray(h * w).fill(0);
+    const neighbours = addMoore(p);
+    for (let n of neighbours) {
+        const val = dotGrid.get(n.x, n.y);
+        if (val != Dot.VOID) {
+            adj[p_to_i(n, w)] = Link.VALID
+        }
+    }
+    return adj
+}
+
+const getWallDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
+    const h = dotGrid.h;
+    const w = dotGrid.w;
+    const adj: AdjVector = new Uint8ClampedArray(h * w).fill(0);
+    const neighbours = addMoore(p);
+    for (let n of neighbours) {
+        const val = dotGrid.get(n.x, n.y);
+        switch (val) {
+            case Dot.VOID:
+                null;
+            case Dot.WALL:
+                // handle bounces
+                const dx = n.x - p.x;
+                const dy = n.y - p.y;
+                const delta = dx + dy;
+                // disallow vertical or horizontal bounces
+                // i.e, where x+y = (-)1 + 0 or 0 + (-)1
+                switch (delta) {
+                    case 1:
+                        null;
+                    case -1:
+                        null;
+                    default:
+                        adj[p_to_i(n, w)] = Link.VALID;
+                }
+            case Dot.EMPTY:
+                adj[p_to_i(n, w)] = Link.VALID;
+            default:
+                null;
+        }
+    }
+    return adj
+}
+
+const getAdjMat = (dotGrid: Grid): AdjMatrix => {
+    const h = dotGrid.h;
+    const w = dotGrid.w;
+    const l = h * w
+    // init l Uint8 arrs of size l inside adjMat
+    const adjMat = new Array(l).map(() => new Uint8ClampedArray(l).fill(0))
+
+
+    return adjMat
+
+}
+
 
 const printGrid = (dotGrid: Grid): void => {
     // debug - apologise for emojis but only way to get monospaced
@@ -106,7 +173,10 @@ const printGrid = (dotGrid: Grid): void => {
 }
 
 export const init = (): void => {
+    var startTime = performance.now()
     let grid = new Grid(11, 9);
     grid = addWalls(grid);
+    var endTime = performance.now()
     printGrid(grid);
+    console.log(`Init in ${endTime - startTime} milliseconds`)
 }
