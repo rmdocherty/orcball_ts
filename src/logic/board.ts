@@ -260,7 +260,7 @@ export const init = (): void => {
     }
 }
 
-export class Game {
+export class LogicGame {
     public grid: Grid;
     public adjMat: AdjMatrix;
 
@@ -343,5 +343,3 @@ export class Game {
     }
 
 }
-
-// TODO: add LogicGame class here that tracks state
