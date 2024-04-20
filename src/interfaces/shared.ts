@@ -29,6 +29,22 @@ export enum Link {
     FILLED
 }
 
+export enum Player {
+    P1 = 0,
+    P2 = 1
+}
+
+export enum WinState {
+    NONE = 0,
+    P1_WIN = 1,
+    P2_WIN = 2,
+}
+
+export interface MoveSummary {
+    winState: WinState,
+    moveOver: boolean
+}
+
 export enum Colours {
     LIGHT_GREY = "#bfbbae",
     YELLOW = "#e3ad30",

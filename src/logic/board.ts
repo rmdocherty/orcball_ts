@@ -26,7 +26,7 @@ multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x conv
 The game can then be stored entirely based on these two objects, the current player and the ball position.
 */
 
-import { Point, Dot, Link } from "../interfaces/shared";
+import { Point, Dot, Link, Player, MoveSummary, WinState } from "../interfaces/shared";
 
 
 
@@ -238,9 +238,9 @@ export const init = (): void => {
     const startTime = performance.now()
     let grid = new Grid(11, 9);
     grid = addWalls(grid);
-    let adjMat = getAdjMat(grid)
-    const endTime = performance.now()
-    console.log(`Init in ${endTime - startTime} milliseconds`)
+    let adjMat = getAdjMat(grid);
+    const endTime = performance.now();
+    console.log(`Init in ${endTime - startTime} milliseconds`);
     printGrid(grid);
 
     const moves: Point[][] = [
@@ -252,12 +252,96 @@ export const init = (): void => {
 
     let i = 0;
     for (let mv of moves) {
-        const idx = p_to_i(mv[0], grid.w)
-        printAdjVec(adjMat[idx], idx, grid.h, grid.w)
-        const isValid = isMoveValid(mv[0], mv[1], grid.w, adjMat)
-        console.log("Should be: " + cases[i] + " is: " + isValid)
-        i++
+        const idx = p_to_i(mv[0], grid.w);
+        printAdjVec(adjMat[idx], idx, grid.h, grid.w);
+        const isValid = isMoveValid(mv[0], mv[1], grid.w, adjMat);
+        console.log("Should be: " + cases[i] + " is: " + isValid);
+        i++;
     }
+}
+
+export class Game {
+    public grid: Grid;
+    public adjMat: AdjMatrix;
+
+    public p1Goal: Point;
+    public p2Goal: Point;
+
+    public player: Player;
+    public ballPos: Point;
+
+    constructor(h: number, w: number) {
+        this.grid = new Grid(h, w);
+        this.grid = addWalls(this.grid);
+
+        this.adjMat = getAdjMat(this.grid);
+
+        const hw = Math.floor(w / 2);
+        this.p1Goal = { x: hw, y: 0 };
+        this.p2Goal = { x: hw, y: h - 1 };
+
+        this.player = Player.P1;
+        this.ballPos = { x: 4, y: 5 };
+
+    }
+
+    public makeMove(start: Point, end: Point): MoveSummary {
+        const w = this.grid.w
+
+        const startIdx = p_to_i(start, w)
+        const endIdx = p_to_i(end, w)
+
+        this.adjMat[startIdx][endIdx] = Link.FILLED
+        this.adjMat[endIdx][startIdx] = Link.FILLED
+
+        const oldDotVal = this.grid.get(end.x, end.y)
+        this.grid.set(end.x, end.y, Dot.FILLED)
+        this.ballPos = end
+
+        const over = (oldDotVal != Dot.EMPTY) ? true : false
+        const win = this.checkWin(end, this.player)
+
+        if (over) { // switch to next player if turn over
+            this.player = (1 - this.player)
+        }
+
+        return { winState: win, moveOver: over }
+    }
+
+    public checkWin(newBallPos: Point, player: Player): WinState {
+        const inP1Goal = (newBallPos.x === this.p1Goal.x && newBallPos.y === this.p1Goal.y)
+        const inP2Goal = (newBallPos.x === this.p2Goal.x && newBallPos.y === this.p2Goal.y)
+        const isP1 = (player == Player.P1)
+        const isP2 = (player == Player.P2)
+
+        const endIdx = p_to_i(newBallPos, this.grid.w)
+        const newAdjVector: AdjVector = this.adjMat[endIdx]
+        const sumPossibleMoves = newAdjVector.reduce((acc, val) => acc + val, 0)
+        const lost = (sumPossibleMoves == 0)
+
+        if (isP1 && inP2Goal) { //p1 scores
+            return WinState.P1_WIN
+        } //p1 own goal
+        else if (isP1 && inP1Goal) {
+            return WinState.P2_WIN
+        }//p1 checkmate
+        else if (isP1 && lost) {
+            return WinState.P2_WIN
+        }//p2 scores
+        else if (isP2 && inP1Goal) {
+            return WinState.P2_WIN
+        }//p2 own goal
+        else if (isP2 && inP2Goal) {
+            return WinState.P1_WIN
+        }//p2 checkmate
+        else if (isP2 && lost) {
+            return WinState.P1_WIN
+        }//default
+        else {
+            return WinState.NONE
+        }
+    }
+
 }
 
 // TODO: add LogicGame class here that tracks state
