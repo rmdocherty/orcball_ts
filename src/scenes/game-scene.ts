@@ -1,4 +1,5 @@
 import { Redhat } from '../objects/redhat';
+import { init } from '../logic/board';
 
 export class GameScene extends Phaser.Scene {
   private myRedhat: Redhat;
@@ -27,5 +28,6 @@ export class GameScene extends Phaser.Scene {
     });
 
     emitter.startFollow(this.myRedhat);
+    init();
   }
 }
