@@ -1,3 +1,31 @@
+/* 
+Our logic is made of up two things: a grid of dots with varying states that affect *how* the ball
+can move from there, and an adjacency matrix of connections between the dots that will determine
+*if* the ball can move along a 'link'.
+
+A dot has 5 states: 
+0. EMPTY, a valid dot that the ball has not yet visited
+1. FILLED, a previously valid dot that ball has visited (and is no longer valid)
+2. WALL, a dot that the ball cannot end a turn on or fill but can bounce off  
+3. GOAL, a dot that if the ball ends on wins the player the game
+4. VOID, a dot which can never be filled or moved onto (our boundary conditions)
+
+Will use adjacency matrix representation of the links between our dots - this has more memory
+overhead that say, just storing an array of only valid points, but will make a) the logic
+easier and b) making powers that modify this grid much simpler.
+
+A link in our matrix has 3 states:
+0. INVALID, a link that a ball cannot cross (i.e moving two dots at once)
+1. VALID, i.e, a link to a neighbouring EMPTY dot one square away
+2. FILLED, i.e a previously valid link that the ball cannot cross
+
+We don't have nice numpy style arrays in typescript, so we will represent these as Uint8ClampedArrays,
+which are easy on the memory and hopefully fast. They will be 1D, and we will have to keep track of
+multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x convention of numpy arrays.
+
+The game can then be stored entirely based on these two objects, the current player and the ball position.
+*/
+
 enum Dot {
     // state of a position on the game board
     EMPTY = 0,
@@ -148,13 +176,37 @@ const getWallDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
 const getAdjMat = (dotGrid: Grid): AdjMatrix => {
     const h = dotGrid.h;
     const w = dotGrid.w;
-    const l = h * w
+    const l = h * w;
+    // helper fn.
+    const _fillInvalid = (j: number) => { return new Uint8ClampedArray(j).fill(Link.INVALID) };
     // init l Uint8 arrs of size l inside adjMat
-    const adjMat = new Array(l).map(() => new Uint8ClampedArray(l).fill(0))
+    const adjMat = new Array(l).map(() => _fillInvalid(l));
+    let i = 0;
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const val = dotGrid.get(x, y)
+            switch (val) {
+                case Dot.EMPTY:
+                    adjMat[i] = getEmptyDotAdjVec({ x: x, y: y }, dotGrid);
+                case Dot.VOID:
+                    adjMat[i] = _fillInvalid(l);
+                case Dot.GOAL:
+                    adjMat[i] = _fillInvalid(l);
+                case Dot.WALL:
+                    adjMat[i] = getWallDotAdjVec({ x: x, y: y }, dotGrid);
+                default:
+                    adjMat[i] = _fillInvalid(l);
+            }
+        }
+    }
+    return adjMat;
+}
 
-
-    return adjMat
-
+const isMoveValid = (start: Point, end: Point, w: number, adjMat: AdjMatrix): boolean => {
+    const start_i = p_to_i(start, w)
+    const end_i = p_to_i(end, w)
+    const val = adjMat[start_i][end_i]
+    return (val == Link.VALID)
 }
 
 
@@ -176,6 +228,7 @@ export const init = (): void => {
     var startTime = performance.now()
     let grid = new Grid(11, 9);
     grid = addWalls(grid);
+    let adjMat = getAdjMat(grid)
     var endTime = performance.now()
     printGrid(grid);
     console.log(`Init in ${endTime - startTime} milliseconds`)
