@@ -2,7 +2,7 @@ import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/dots';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, WinState, Colours, Link, Player } from '../interfaces/shared';
+import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
 
@@ -58,9 +58,8 @@ export class GameScene extends Phaser.Scene {
 
     this.makePermanentLine(start, end)
 
-    const validMoves = this.logicGame.getValidMoves(ballPos);
+    const validMoves = this.logicGame.getValidMoves(ballPos, -1);
     this.validMoves = validMoves;
-    console.log(validMoves)
     this.setHighlightValidMoves(validMoves, true);
   }
 
@@ -92,9 +91,8 @@ export class GameScene extends Phaser.Scene {
     if (!this.checkPointValid(queryPoint)) {
       return
     }
-    const summary = this.logicGame.makeMove(ballPoint, queryPoint)
+    const summary = this.logicGame.makeMove(ballPoint, queryPoint, Character.ORC)
     if (summary.moveOver == true) {
-      console.log('ahh')
       const newPlayer = this.logicGame.player
       const newColourHex = (newPlayer == Player.P1) ? Colours.P1_COL : Colours.P2_COL
       const newColour = colourEnumToPhaserColor(newColourHex)

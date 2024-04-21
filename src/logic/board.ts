@@ -26,7 +26,7 @@ multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x conv
 The game can then be stored entirely based on these two objects, the current player and the ball position.
 */
 
-import { Point, Dot, Link, Player, MoveSummary, WinState } from "../interfaces/shared";
+import { Point, Dot, Link, Player, MoveSummary, WinState, Character } from "../interfaces/shared";
 import { i_to_p, p_to_i } from "../interfaces/shared";
 
 
@@ -68,10 +68,9 @@ const moore: Point[] = [
     { x: 1, y: 1 }
 ]
 
-// this could all be faster w/out instantiating a class for everything
-const addMoore = (p: Point): Point[] => {
+const addMoore = (p: Point, sf: number = 1): Point[] => {
     // list of all points in moore neighbourhood of p
-    return moore.map((m) => ({ x: m.x + p.x, y: m.y + p.y }));
+    return moore.map((m) => ({ x: sf * m.x + p.x, y: sf * m.y + p.y }));
 }
 
 const addWalls = (dotGrid: Grid): Grid => {
@@ -98,13 +97,13 @@ const addWalls = (dotGrid: Grid): Grid => {
     return dotGrid;
 }
 
-const getEmptyDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
+const getEmptyDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVector => {
+    // TODO: parameterise this w/ neighbours s.t custom neighbourts (for abilities can be used)
     // Look in Moore neighbourhood of dot, if neighbour is not void add link to adj row
     const h = dotGrid.h;
     const w = dotGrid.w;
 
     const adj: AdjVector = new Uint8ClampedArray(h * w).fill(Link.INVALID);
-    const neighbours = addMoore(p);
     for (let n of neighbours) {
         const val = dotGrid.get(n.x, n.y);
         if (val != Dot.VOID) {
@@ -114,11 +113,11 @@ const getEmptyDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
     return adj
 }
 
-const getWallDotAdjVec = (p: Point, dotGrid: Grid): AdjVector => {
+const getWallDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVector => {
+    // TODO: parameterise this w/ neighbours s.t custom neighbourts (for abilities can be used)
     const h = dotGrid.h;
     const w = dotGrid.w;
     const adj: AdjVector = new Uint8ClampedArray(h * w).fill(Link.INVALID);
-    const neighbours = addMoore(p);
     for (let n of neighbours) {
         const val = dotGrid.get(n.x, n.y);
         switch (val) {
@@ -168,11 +167,12 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
     const adjMat = new Array(l).fill(0).map(() => _fillInvalid(l));
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            const idx = p_to_i({ x: x, y: y }, w);
+            const p: Point = { x: x, y: y }
+            const idx = p_to_i(p, w);
             const val = dotGrid.get(x, y);
             switch (val) {
                 case Dot.EMPTY:
-                    adjMat[idx] = getEmptyDotAdjVec({ x: x, y: y }, dotGrid);
+                    adjMat[idx] = getEmptyDotAdjVec(p, dotGrid, addMoore(p));
                     break;
                 case Dot.VOID:
                     adjMat[idx] = _fillInvalid(l);
@@ -181,7 +181,7 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
                     adjMat[idx] = _fillInvalid(l);
                     break;
                 case Dot.WALL:
-                    adjMat[idx] = getWallDotAdjVec({ x: x, y: y }, dotGrid);
+                    adjMat[idx] = getWallDotAdjVec(p, dotGrid, addMoore(p));
                     break;
                 default:
                     break;
@@ -277,22 +277,51 @@ export class LogicGame {
 
         this.player = Player.P1;
         this.ballPos = { x: 4, y: 5 };
+        // this needs to be filled @ start
+        this.grid.set(this.ballPos.x, this.ballPos.y, Dot.FILLED);
 
     }
 
-    public getValidMoves(start: Point): Point[] {
+    private singleMoveAbilities(adjVec: AdjVector, start: Point, character: Character): number[] {
+        const adjVecArr = Array.from(adjVec); // cast to arr or can't be -1
+        let remapped
+        switch (character) {
+            case (Character.WARRIOR):
+                // simplest, just change map condition to x > 0
+                remapped = adjVecArr.map((x, i) => ((x > 0) ? i : -1));
+                break;
+            case (Character.MAGE):
+                // call 'getWallAdjMat' with custom neighbourhood
+                // will need to compute this s.t it wraps round (diff between p and p + 2n % (h,w))
+                break;
+            case (Character.RANGER):
+                const m1 = addMoore(start)
+                const m2 = addMoore(start, 2)
+                const newNeighbourhood = m1.concat(m2)
+                const newAdjVec = getEmptyDotAdjVec(start, this.grid, newNeighbourhood)
+                const newAdjVecArr = Array.from(newAdjVec)
+                remapped = newAdjVecArr.map((x, i) => ((x == 1) ? i : -1));
+                // call correct 'getAdjMat' for current point wiht custom neigbourhood (moore + 2* moore)
+                break;
+            default:
+                remapped = adjVecArr.map((x, i) => ((x == 1) ? i : -1));
+                break;
+        }
+        return remapped
+    }
+
+    public getValidMoves(start: Point, character: Character): Point[] {
         const startIdx = p_to_i(start, this.grid.w);
         console.log(startIdx);
         const adjVec: AdjVector = this.adjMat[startIdx];
-        const adjVecArr = Array.from(adjVec); // cast to arr or can't be -1
+        const remapped = this.singleMoveAbilities(adjVec, start, character)
 
-        const remapped = adjVecArr.map((x, i) => ((x == 1) ? i : -1));
         const nonZeroInds = remapped.filter((x) => x > -1);
         const validPoints: Point[] = nonZeroInds.map((x) => i_to_p(x, this.grid.w));
         return validPoints;
     }
 
-    public makeMove(start: Point, end: Point): MoveSummary {
+    public makeMove(start: Point, end: Point, character: Character): MoveSummary {
         const w = this.grid.w;
 
         const startIdx = p_to_i(start, w);
@@ -308,7 +337,7 @@ export class LogicGame {
 
         const win = this.checkWin(end, this.player);
 
-        if (over) { // switch to next player if turn over
+        if (over && character != Character.ORC) { // switch to next player if turn over
             this.player = (1 - this.player);
         }
 

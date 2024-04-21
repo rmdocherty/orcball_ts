@@ -42,6 +42,18 @@ export enum Player {
     P2 = 1
 }
 
+export enum Character {
+    NONE = -1,
+    WARRIOR = 0,
+    MAGE,
+    ORC,
+    RANGER,
+    DWARF,
+    PREIST
+}
+
+export const characterNames = ["Foo", "Warrior", "Mage", "Orc", "Ranger", "Dwarf", "Priest"]
+
 export enum WinState {
     NONE = 0,
     P1_WIN = 1,
