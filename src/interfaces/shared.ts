@@ -6,6 +6,7 @@ export const GAME_W = 375 * 2
 export const GAME_H = 667 * 2
 export const DOT_SPACING = 75
 export const DOT_SIZE = 20
+export const LINE_WIDTH = 4
 export const OFFSET: Point = {
     x: (GAME_W - (DEFAULT_W * DOT_SPACING)),
     y: (GAME_H - (DEFAULT_H * DOT_SPACING)) / 2

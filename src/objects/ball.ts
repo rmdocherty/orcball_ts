@@ -21,4 +21,10 @@ export class Ball extends Phaser.GameObjects.Ellipse {
     onPointerOver(): void { // TODO: delete these
         this.emit('hover', this)
     }
+
+    move(newPos: Point): void {
+        const gfxPos = toGfxPos(newPos);
+        this.setPosition(gfxPos.x, gfxPos.y)
+        this.gfxPos = gfxPos
+    }
 }

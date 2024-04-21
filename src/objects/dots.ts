@@ -12,6 +12,9 @@ export class GraphicDot extends Phaser.GameObjects.Container {
     outerDot: Phaser.GameObjects.Ellipse;
     debugText: Phaser.GameObjects.Text;
 
+    innerColor: number;
+    outerColor: number;
+
     constructor(params: DotsConstructor) {
         super(params.scene);
         this.logicPos = params.logicPos;
@@ -21,10 +24,10 @@ export class GraphicDot extends Phaser.GameObjects.Container {
 
         const r = DOT_SIZE;
         const c = Phaser.Display.Color.HexStringToColor(valToCol[params.val]);
-        const color = Phaser.Display.Color.GetColor32(c.red, c.green, c.blue, c.alpha);
-        const outerColor = Phaser.Display.Color.GetColor32(245, 234, 240, 100);
-        this.innerDot = new Phaser.GameObjects.Ellipse(params.scene, x, y, r, r, color);
-        this.outerDot = new Phaser.GameObjects.Ellipse(params.scene, x, y, r + 10, r + 10, outerColor, 0);
+        this.innerColor = Phaser.Display.Color.GetColor32(c.red, c.green, c.blue, c.alpha);
+        this.outerColor = Phaser.Display.Color.GetColor32(245, 234, 240, 100);
+        this.innerDot = new Phaser.GameObjects.Ellipse(params.scene, x, y, r, r, this.innerColor);
+        this.outerDot = new Phaser.GameObjects.Ellipse(params.scene, x, y, r + 10, r + 10, this.outerColor, 0);
 
         this.debugText = new Phaser.GameObjects.Text(params.scene, x - 20, y - 8, this.logicPos.x.toString() + "," + this.logicPos.y.toString(), { color: '#000000' });
 
@@ -40,18 +43,16 @@ export class GraphicDot extends Phaser.GameObjects.Container {
         } else {
             this.initInputs();
         }
-
-
         this.scene.add.existing(this);
     }
 
     private initInputs(): void {
-        this.innerDot.setInteractive()
+        this.outerDot.setInteractive()
         const fns = [this.onPointerDown, this.onPointerOver, this.onPointerOut];
         const events = ["pointerdown", "pointerover", "pointerout"];
         for (let i = 0; i < fns.length; i++) {
             // bind otherwise 'this' in fn refers to inner dot
-            this.innerDot.on(events[i], fns[i].bind(this));
+            this.outerDot.on(events[i], fns[i].bind(this));
         }
     }
 
@@ -59,16 +60,28 @@ export class GraphicDot extends Phaser.GameObjects.Container {
         this.outerDot.visible = true;
     }
 
-    private unhighlight(): void {
+    public unhighlight(): void {
         this.outerDot.visible = false;
     }
 
+    public grow(): void {
+        this.outerDot.fillColor = this.innerColor
+    }
+
+    public shrink(): void {
+        this.outerDot.fillColor = this.outerColor
+    }
+
     private onPointerOver(): void {
+        this.grow()
         this.emit('dot_hover_on', this);
+        console.log('over')
     }
 
     private onPointerOut(): void {
+        this.shrink()
         this.emit('dot_hover_off', this);
+        console.log('out')
     }
 
     private onPointerDown(): void {
