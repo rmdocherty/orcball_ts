@@ -126,10 +126,6 @@ export class GameScene extends Phaser.Scene {
 
   initLine(): Phaser.GameObjects.Line {
     const lineColour = Phaser.Display.Color.GetColor32(245, 234, 240, 100);
-    //const tmpLine = new Phaser.GameObjects.Line(this, 0, 0, 100, 100, 150, 150, lineColour, 0)
-    //tmpLine.setLineWidth(2 * LINE_WIDTH, 2 * LINE_WIDTH)
-    //tmpLine.visible = false
-    //tmpLine.setDepth(-10)
     const tmpLine = this.createLine(0, 0, 0, 0, lineColour, 2 * LINE_WIDTH, false)
     return tmpLine
   }

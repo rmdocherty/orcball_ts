@@ -33,7 +33,7 @@ export class GraphicDot extends Phaser.GameObjects.Container {
 
         this.add(this.innerDot);
         this.add(this.outerDot);
-        this.add(this.debugText);
+        //this.add(this.debugText);
 
         this.moveUp(this.innerDot); // depth sorting for container
         this.outerDot.visible = false; // hide initially

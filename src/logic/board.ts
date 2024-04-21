@@ -115,7 +115,6 @@ const addWalls = (dotGrid: Grid): Grid => {
 }
 
 const getEmptyDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVector => {
-    // TODO: parameterise this w/ neighbours s.t custom neighbourts (for abilities can be used)
     // Look in Moore neighbourhood of dot, if neighbour is not void add link to adj row
     const h = dotGrid.h;
     const w = dotGrid.w;
@@ -131,7 +130,6 @@ const getEmptyDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVec
 }
 
 const getWallDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVector => {
-    // TODO: parameterise this w/ neighbours s.t custom neighbourts (for abilities can be used)
     const h = dotGrid.h;
     const w = dotGrid.w;
     const adj: AdjVector = new Uint8ClampedArray(h * w).fill(Link.INVALID);
@@ -336,7 +334,6 @@ export class LogicGame {
                 break;
             case (Character.MAGE):
                 remapped = getMageValidMoves(adjVecArr, this.grid, start, startVal)
-                // TODO: ensure old adjVec respected for mage and ranger abilities - comparing/mapping
                 break;
             case (Character.RANGER):
                 // call correct 'getAdjMat' for current point with custom neigbourhood (moore + 2* moore)
