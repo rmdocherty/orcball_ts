@@ -2,19 +2,24 @@ import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/dots';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, DOT_SIZE, LINE_WIDTH, WinState, Colours, valToCol, Link } from '../interfaces/shared';
-import { i_to_p, p_to_i } from "../interfaces/shared";
+import { Dot, Point, toGfxPos, WinState, Colours, Link, Player } from '../interfaces/shared';
+import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H } from '../interfaces/shared';
+import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
 
 
 const centerPoint = (p: Point): Point => {
   return { x: p.x + DOT_SIZE + LINE_WIDTH, y: p.y + DOT_SIZE + LINE_WIDTH }
 }
 
+
+
 export class GameScene extends Phaser.Scene {
   private ball: Ball;
   private gfxDots: GraphicDot[];
   private drawnLines: Phaser.GameObjects.Line[] = [];
   private tmpLine: Phaser.GameObjects.Line;
+  private playerBanner: Phaser.GameObjects.Rectangle;
+
   private validMoves: Point[] = [];
   private logicGame: LogicGame;
 
@@ -36,6 +41,10 @@ export class GameScene extends Phaser.Scene {
 
     this.tmpLine = this.initLine()
     this.add.existing(this.tmpLine)
+
+    const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
+    this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
+    this.add.existing(this.playerBanner)
 
     this.handleMoveEnd(ballPos, ballPos);
   }
@@ -84,6 +93,14 @@ export class GameScene extends Phaser.Scene {
       return
     }
     const summary = this.logicGame.makeMove(ballPoint, queryPoint)
+    if (summary.moveOver == true) {
+      console.log('ahh')
+      const newPlayer = this.logicGame.player
+      const newColourHex = (newPlayer == Player.P1) ? Colours.P1_COL : Colours.P2_COL
+      const newColour = colourEnumToPhaserColor(newColourHex)
+      this.playerBanner.fillColor = newColour
+    }
+
     if (summary.winState != WinState.NONE) {
       console.log("Game over, " + summary.winState.toString())
     }
@@ -162,12 +179,6 @@ export class GameScene extends Phaser.Scene {
     this.add.existing(tmpLine)
   }
 
-
-
-
-  // best way is temp line that gets moved around
-  // when moved confirmed create proper line and store it in an attr list
-  // ensure lines below dots in terms of z-index
-
-
+  //TODO: add player colour banner @ bottom
+  // add abilities: shape icon for player, ability button on bottom
 }

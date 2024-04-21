@@ -7,6 +7,7 @@ export const GAME_H = 667 * 2
 export const DOT_SPACING = 75
 export const DOT_SIZE = 20
 export const LINE_WIDTH = 4
+export const BANNER_H = 48
 export const OFFSET: Point = {
     x: (GAME_W - (DEFAULT_W * DOT_SPACING)),
     y: (GAME_H - (DEFAULT_H * DOT_SPACING)) / 2
@@ -59,11 +60,20 @@ export enum Colours {
     ORANGE = "#e65000",
     WHITE = "#ffffff",
     BROWN = "#7a450c",
-    P1_COL = "#fc2c03",
+    P1_COL = "#fa442f",
     P2_COL = "#0352fc",
 }
 
-export const valToCol = [Colours.LIGHT_GREY, Colours.YELLOW, Colours.DARK_GREY, Colours.ORANGE, Colours.WHITE]
+export const valToCol = [
+    Colours.LIGHT_GREY,
+    Colours.YELLOW,
+    Colours.DARK_GREY,
+    Colours.ORANGE,
+    Colours.WHITE,
+    Colours.BROWN,
+    Colours.P1_COL,
+    Colours.P2_COL
+]
 
 
 export interface DotsConstructor {
@@ -88,10 +98,15 @@ export const p_to_i = (p: Point, nx: number): number => {
     return p.y * nx + p.x;
 }
 
-
 export const toGfxPos = (logicPos: Point): Point => {
     const l = DOT_SPACING;
     const [ox, oy] = [OFFSET.x, OFFSET.y];
     const gfxPos = { x: logicPos.x * l + ox, y: logicPos.y * l + oy };
     return gfxPos;
+}
+
+export const colourEnumToPhaserColor = (colour: Colours): number => {
+    const c = Phaser.Display.Color.HexStringToColor(colour);
+    const phaserColour = Phaser.Display.Color.GetColor32(c.red, c.green, c.blue, c.alpha);
+    return phaserColour;
 }

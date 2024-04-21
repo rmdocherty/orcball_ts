@@ -301,11 +301,11 @@ export class LogicGame {
         this.adjMat[startIdx][endIdx] = Link.FILLED;
         this.adjMat[endIdx][startIdx] = Link.FILLED;
 
-        const oldDotVal = this.grid.get(end.x, end.y);
+        const newDotVal = this.grid.get(end.x, end.y);
+        const over = (newDotVal == Dot.EMPTY) ? true : false;
         this.grid.set(end.x, end.y, Dot.FILLED);
         this.ballPos = end;
 
-        const over = (oldDotVal != Dot.EMPTY) ? true : false;
         const win = this.checkWin(end, this.player);
 
         if (over) { // switch to next player if turn over
