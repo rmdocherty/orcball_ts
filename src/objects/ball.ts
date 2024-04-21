@@ -9,7 +9,7 @@ export class Ball extends Phaser.GameObjects.Ellipse {
         const gfxPos = toGfxPos(pos);
         const c = Phaser.Display.Color.HexStringToColor(Colours.BROWN);
         const color = Phaser.Display.Color.GetColor32(c.red, c.green, c.blue, c.alpha);
-        super(scene, gfxPos.x, gfxPos.y, DOT_SIZE + 10, DOT_SIZE + 10, color);
+        super(scene, gfxPos.x, gfxPos.y, DOT_SIZE + 15, DOT_SIZE + 15, color);
         this.logicPos = pos;
 
         // chrome dev console interferes with pointer over events, firefox doesn't
@@ -18,10 +18,7 @@ export class Ball extends Phaser.GameObjects.Ellipse {
         this.scene.add.existing(this);
     }
 
-    onPointerOver(): void {
+    onPointerOver(): void { // TODO: delete these
         this.emit('hover', this)
     }
-
-
-
 }

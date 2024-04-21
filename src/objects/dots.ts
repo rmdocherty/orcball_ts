@@ -64,15 +64,15 @@ export class GraphicDot extends Phaser.GameObjects.Container {
     }
 
     private onPointerOver(): void {
-        this.emit('dot_hover_on', this)
+        this.emit('dot_hover_on', this);
     }
 
     private onPointerOut(): void {
-        this.emit('dot_hover_off', this)
+        this.emit('dot_hover_off', this);
     }
 
     private onPointerDown(): void {
-        this.emit('dot_click_on', this)
+        this.emit('dot_click_on', this);
     }
 
     private onPointerUp(): void {

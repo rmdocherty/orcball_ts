@@ -276,76 +276,76 @@ export class LogicGame {
         this.p2Goal = { x: hw, y: h - 1 };
 
         this.player = Player.P1;
-        this.ballPos = { x: 4, y: 3 };
+        this.ballPos = { x: 4, y: 5 };
 
     }
 
     public getValidMoves(start: Point): Point[] {
-        const startIdx = p_to_i(start, this.grid.w)
-        console.log(startIdx)
-        const adjVec: AdjVector = this.adjMat[startIdx]
-        const adjVecArr = Array.from(adjVec) // cast to arr or can't be -1
+        const startIdx = p_to_i(start, this.grid.w);
+        console.log(startIdx);
+        const adjVec: AdjVector = this.adjMat[startIdx];
+        const adjVecArr = Array.from(adjVec); // cast to arr or can't be -1
 
-        const remapped = adjVecArr.map((x, i) => ((x > 0) ? i : -1))
-        const nonZeroInds = remapped.filter((x) => x > -1)
-        const validPoints: Point[] = nonZeroInds.map((x) => i_to_p(x, this.grid.w))
-        return validPoints
+        const remapped = adjVecArr.map((x, i) => ((x > 0) ? i : -1));
+        const nonZeroInds = remapped.filter((x) => x > -1);
+        const validPoints: Point[] = nonZeroInds.map((x) => i_to_p(x, this.grid.w));
+        return validPoints;
     }
 
     public makeMove(start: Point, end: Point): MoveSummary {
-        const w = this.grid.w
+        const w = this.grid.w;
 
-        const startIdx = p_to_i(start, w)
-        const endIdx = p_to_i(end, w)
+        const startIdx = p_to_i(start, w);
+        const endIdx = p_to_i(end, w);
 
-        this.adjMat[startIdx][endIdx] = Link.FILLED
-        this.adjMat[endIdx][startIdx] = Link.FILLED
+        this.adjMat[startIdx][endIdx] = Link.FILLED;
+        this.adjMat[endIdx][startIdx] = Link.FILLED;
 
-        const oldDotVal = this.grid.get(end.x, end.y)
-        this.grid.set(end.x, end.y, Dot.FILLED)
-        this.ballPos = end
+        const oldDotVal = this.grid.get(end.x, end.y);
+        this.grid.set(end.x, end.y, Dot.FILLED);
+        this.ballPos = end;
 
-        const over = (oldDotVal != Dot.EMPTY) ? true : false
-        const win = this.checkWin(end, this.player)
+        const over = (oldDotVal != Dot.EMPTY) ? true : false;
+        const win = this.checkWin(end, this.player);
 
         if (over) { // switch to next player if turn over
-            this.player = (1 - this.player)
+            this.player = (1 - this.player);
         }
 
-        return { winState: win, moveOver: over }
+        return { winState: win, moveOver: over };
     }
 
     public checkWin(newBallPos: Point, player: Player): WinState {
-        const inP1Goal = (newBallPos.x === this.p1Goal.x && newBallPos.y === this.p1Goal.y)
-        const inP2Goal = (newBallPos.x === this.p2Goal.x && newBallPos.y === this.p2Goal.y)
-        const isP1 = (player == Player.P1)
-        const isP2 = (player == Player.P2)
+        const inP1Goal = (newBallPos.x === this.p1Goal.x && newBallPos.y === this.p1Goal.y);
+        const inP2Goal = (newBallPos.x === this.p2Goal.x && newBallPos.y === this.p2Goal.y);
+        const isP1 = (player == Player.P1);
+        const isP2 = (player == Player.P2);
 
-        const endIdx = p_to_i(newBallPos, this.grid.w)
-        const newAdjVector: AdjVector = this.adjMat[endIdx]
-        const sumPossibleMoves = newAdjVector.reduce((acc, val) => acc + val, 0)
-        const lost = (sumPossibleMoves == 0)
+        const endIdx = p_to_i(newBallPos, this.grid.w);
+        const newAdjVector: AdjVector = this.adjMat[endIdx];
+        const sumPossibleMoves = newAdjVector.reduce((acc, val) => acc + val, 0);
+        const lost = (sumPossibleMoves == 0);
 
         if (isP1 && inP2Goal) { //p1 scores
-            return WinState.P1_WIN
+            return WinState.P1_WIN;
         } //p1 own goal
         else if (isP1 && inP1Goal) {
-            return WinState.P2_WIN
+            return WinState.P2_WIN;
         }//p1 checkmate
         else if (isP1 && lost) {
-            return WinState.P2_WIN
+            return WinState.P2_WIN;
         }//p2 scores
         else if (isP2 && inP1Goal) {
-            return WinState.P2_WIN
+            return WinState.P2_WIN;
         }//p2 own goal
         else if (isP2 && inP2Goal) {
-            return WinState.P1_WIN
+            return WinState.P1_WIN;
         }//p2 checkmate
         else if (isP2 && lost) {
-            return WinState.P1_WIN
+            return WinState.P1_WIN;
         }//default
         else {
-            return WinState.NONE
+            return WinState.NONE;
         }
     }
 
