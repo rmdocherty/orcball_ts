@@ -30,7 +30,6 @@ import { Point, Dot, Link, Player, MoveSummary, WinState, Character } from "../i
 import { i_to_p, p_to_i } from "../interfaces/shared";
 
 
-
 class Grid {
     dots: Uint8ClampedArray
     constructor(public h: number, public w: number) {
@@ -53,7 +52,6 @@ class Grid {
 }
 
 
-
 type AdjVector = Uint8ClampedArray
 type AdjMatrix = AdjVector[]
 
@@ -67,7 +65,7 @@ const moore: Point[] = [
     { x: 1, y: 0 },
     { x: 1, y: 1 }
 ]
-
+const diag: Point[] = [moore[0], moore[2], moore[5], moore[7]]
 
 const mod = (n: number, m: number): number => {
     return ((n % m) + m) % m;
@@ -84,6 +82,12 @@ const mageAddMoore = (p: Point, modX: number, modY: number, ox: number = 1, oy: 
         x: mod(m.x + tempP.x, modX) + ox,
         y: mod(m.y + tempP.y, modY) + oy
     }));
+}
+
+const rangerAddMoore = (p: Point): Point[] => {
+    const m1 = addMoore(p, 1)
+    const d2 = diag.map((m) => ({ x: 2 * m.x + p.x, y: 2 * m.y + p.y }));
+    return m1.concat(d2)
 }
 
 const addWalls = (dotGrid: Grid): Grid => {
@@ -127,7 +131,6 @@ const getEmptyDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVec
 }
 
 const getWallDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVector => {
-    console.log('checkign wall')
     // TODO: parameterise this w/ neighbours s.t custom neighbourts (for abilities can be used)
     const h = dotGrid.h;
     const w = dotGrid.w;
@@ -207,11 +210,35 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
 }
 
 const isMoveValid = (start: Point, end: Point, w: number, adjMat: AdjMatrix): boolean => {
-    const start_i = p_to_i(start, w)
-    const end_i = p_to_i(end, w)
+    const start_i = p_to_i(start, w);
+    const end_i = p_to_i(end, w);
 
-    const val = adjMat[start_i][end_i]
-    return (val == Link.VALID)
+    const val = adjMat[start_i][end_i];
+    return (val == Link.VALID);
+}
+
+const getMageValidMoves = (oldAdjVec: number[], grid: Grid, start: Point, startVal: Dot) => {
+    // fancy mod neighbourhood 
+    const wrapNeighbourhood = mageAddMoore(start, grid.w - 2, grid.h - 2);
+    // only add wrap round if on a wall - it shouldn't be posible to trigger this on empty but useful for debug
+    const mageNeighbourhood = (startVal == Dot.WALL) ? wrapNeighbourhood : addMoore(start);
+    const mageAdjFn = (startVal != Dot.WALL) ? getEmptyDotAdjVec : getWallDotAdjVec;
+    const mAdjVec = mageAdjFn(start, grid, mageNeighbourhood);
+    // conver to arr for filtering later
+    const mAdjVecArr = Array.from(mAdjVec);
+    // add back in old FILLED links from the existing adjVec
+    const combinedAdjVecArr = mAdjVecArr.map((v, idx) => ((oldAdjVec[idx] != Link.FILLED) ? v : 2))
+    // map all INVALID/FILLED links to -1 for filter later
+    return combinedAdjVecArr.map((x, i) => ((x == 1) ? i : -1));
+}
+
+const getRangerValidMoves = (oldAdjVec: number[], grid: Grid, start: Point, startVal: Dot) => {
+    const addedNeighbourhood = rangerAddMoore(start);
+    const rangerAdjFn = (startVal == Dot.EMPTY) ? getEmptyDotAdjVec : getWallDotAdjVec;
+    const newAdjVec = rangerAdjFn(start, grid, addedNeighbourhood);
+    const newAdjVecArr = Array.from(newAdjVec);
+    const combinedAdjVecArr = newAdjVecArr.map((v, idx) => ((oldAdjVec[idx] != Link.FILLED) ? v : 2))
+    return combinedAdjVecArr.map((x, i) => ((x == 1) ? i : -1));
 }
 
 
@@ -308,26 +335,12 @@ export class LogicGame {
                 remapped = adjVecArr.map((x, i) => ((x > 0) ? i : -1));
                 break;
             case (Character.MAGE):
-                const mm = mageAddMoore(start, this.grid.w - 2, this.grid.h - 2)
-                console.log(mm, startVal)
-                const mageNeighbourhood = (startVal == Dot.WALL) ? mm : addMoore(start)
-                const mageAdjFn = (startVal != Dot.WALL) ? getEmptyDotAdjVec : getWallDotAdjVec
-                const mAdjVec = mageAdjFn(start, this.grid, mageNeighbourhood)
-                const mAdjVecArr = Array.from(mAdjVec)
-                remapped = mAdjVecArr.map((x, i) => ((x == 1) ? i : -1));
+                remapped = getMageValidMoves(adjVecArr, this.grid, start, startVal)
                 // TODO: ensure old adjVec respected for mage and ranger abilities - comparing/mapping
-                // TODO: break into separate functions
                 break;
             case (Character.RANGER):
                 // call correct 'getAdjMat' for current point with custom neigbourhood (moore + 2* moore)
-                const m1 = addMoore(start)
-                const m2 = addMoore(start, 2)
-                const rangerNeighbourhood = m1.concat(m2)
-                // need to distinguish between wall or not
-                const rangerAdjFn = (startVal == Dot.EMPTY) ? getEmptyDotAdjVec : getWallDotAdjVec
-                const newAdjVec = rangerAdjFn(start, this.grid, rangerNeighbourhood)
-                const newAdjVecArr = Array.from(newAdjVec)
-                remapped = newAdjVecArr.map((x, i) => ((x == 1) ? i : -1));
+                remapped = getRangerValidMoves(adjVecArr, this.grid, start, startVal)
                 break;
             default:
                 remapped = adjVecArr.map((x, i) => ((x == 1) ? i : -1));

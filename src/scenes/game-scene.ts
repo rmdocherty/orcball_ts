@@ -58,7 +58,7 @@ export class GameScene extends Phaser.Scene {
 
     this.makePermanentLine(start, end)
 
-    const validMoves = this.logicGame.getValidMoves(ballPos, Character.MAGE);
+    const validMoves = this.logicGame.getValidMoves(ballPos, Character.RANGER);
     this.validMoves = validMoves;
     this.setHighlightValidMoves(validMoves, true);
   }
