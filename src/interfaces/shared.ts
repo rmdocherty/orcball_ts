@@ -79,7 +79,7 @@ export interface ImageConstructor {
 }
 
 export const i_to_p = (i: number, nx: number): Point => {
-    return { x: Math.floor(i / nx), y: i % nx };
+    return { x: i % nx, y: Math.floor(i / nx) };
 }
 
 export const p_to_i = (p: Point, nx: number): number => {

@@ -183,6 +183,8 @@ const getAdjMat = (dotGrid: Grid): AdjMatrix => {
                 case Dot.WALL:
                     adjMat[idx] = getWallDotAdjVec({ x: x, y: y }, dotGrid);
                     break;
+                default:
+                    break;
             }
         }
     }
@@ -274,12 +276,13 @@ export class LogicGame {
         this.p2Goal = { x: hw, y: h - 1 };
 
         this.player = Player.P1;
-        this.ballPos = { x: 4, y: 5 };
+        this.ballPos = { x: 4, y: 3 };
 
     }
 
     public getValidMoves(start: Point): Point[] {
         const startIdx = p_to_i(start, this.grid.w)
+        console.log(startIdx)
         const adjVec: AdjVector = this.adjMat[startIdx]
         const adjVecArr = Array.from(adjVec) // cast to arr or can't be -1
 

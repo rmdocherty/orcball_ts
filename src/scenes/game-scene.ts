@@ -22,7 +22,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.logicGame = new LogicGame(11, 9);
     this.gfxDots = this.initDots(this.logicGame);
-    this.ball = new Ball(this, { x: 4, y: 5 })
+    this.ball = new Ball(this, this.logicGame.ballPos)
     this.ball.on('hover', this.onBallHover, this)
   }
 
@@ -31,6 +31,7 @@ export class GameScene extends Phaser.Scene {
     for (let y = 0; y < game.grid.h; y++) {
       for (let x = 0; x < game.grid.w; x++) {
         const val = game.grid.get(x, y);
+        // x and y are flipped in my rendering
         const tmpDot = new GraphicDot({ scene: this, logicPos: { x: x, y: y }, val: val });
         dots.push(tmpDot);
       }
@@ -40,9 +41,9 @@ export class GameScene extends Phaser.Scene {
 
   onBallHover(): void {
     const ballPos = this.logicGame.ballPos
+    console.log(ballPos)
     const validMoves = this.logicGame.getValidMoves(ballPos)
     for (let p of validMoves) {
-      console.log(p)
       const idx = p_to_i(p, this.logicGame.grid.w);
       this.gfxDots[idx].onPointerDown();
     }
