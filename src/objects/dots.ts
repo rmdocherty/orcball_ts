@@ -1,6 +1,9 @@
 import { Point, DotsConstructor, valToCol, toGfxPos } from "../interfaces/shared";
 import { DOT_SIZE, DOT_SPACING, OFFSET, Dot } from "../interfaces/shared";
 
+
+// these will be simpler in the game: actually just sprites where the highlighting is
+// handled by frames
 export class GraphicDot extends Phaser.GameObjects.Container {
     logicPos: Point;
     gfxPos: Point;
@@ -27,7 +30,7 @@ export class GraphicDot extends Phaser.GameObjects.Container {
 
         this.add(this.innerDot);
         this.add(this.outerDot);
-        this.add(this.debugText);
+        //this.add(this.debugText);
 
         this.moveUp(this.innerDot); // depth sorting for container
         this.outerDot.visible = false; // hide initially
@@ -44,24 +47,35 @@ export class GraphicDot extends Phaser.GameObjects.Container {
 
     private initInputs(): void {
         this.innerDot.setInteractive()
-        const fns = [this.onPointerDown, this.onPointerOff, this.onPointerUp];
-        const events = ["pointerdown", "pointerout", "pointerup"];
+        const fns = [this.onPointerDown, this.onPointerOver, this.onPointerOut];
+        const events = ["pointerdown", "pointerover", "pointerout"];
         for (let i = 0; i < fns.length; i++) {
             // bind otherwise 'this' in fn refers to inner dot
             this.innerDot.on(events[i], fns[i].bind(this));
         }
     }
 
-    public onPointerDown(): void {
+    public highlight(): void {
         this.outerDot.visible = true;
     }
 
-    private onPointerOff(): void {
+    private unhighlight(): void {
         this.outerDot.visible = false;
+    }
+
+    private onPointerOver(): void {
+        this.emit('dot_hover_on', this)
+    }
+
+    private onPointerOut(): void {
+        this.emit('dot_hover_off', this)
+    }
+
+    private onPointerDown(): void {
+        this.emit('dot_click_on', this)
     }
 
     private onPointerUp(): void {
         this.outerDot.visible = false;
     }
-
 }
