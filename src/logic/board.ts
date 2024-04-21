@@ -68,9 +68,22 @@ const moore: Point[] = [
     { x: 1, y: 1 }
 ]
 
+
+const mod = (n: number, m: number): number => {
+    return ((n % m) + m) % m;
+}
+
 const addMoore = (p: Point, sf: number = 1): Point[] => {
     // list of all points in moore neighbourhood of p
     return moore.map((m) => ({ x: sf * m.x + p.x, y: sf * m.y + p.y }));
+}
+
+const mageAddMoore = (p: Point, modX: number, modY: number, ox: number = 1, oy: number = 1): Point[] => {
+    const tempP: Point = { x: p.x - ox, y: p.y - oy }
+    return moore.map((m) => ({
+        x: mod(m.x + tempP.x, modX) + ox,
+        y: mod(m.y + tempP.y, modY) + oy
+    }));
 }
 
 const addWalls = (dotGrid: Grid): Grid => {
@@ -114,6 +127,7 @@ const getEmptyDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVec
 }
 
 const getWallDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVector => {
+    console.log('checkign wall')
     // TODO: parameterise this w/ neighbours s.t custom neighbourts (for abilities can be used)
     const h = dotGrid.h;
     const w = dotGrid.w;
@@ -121,6 +135,7 @@ const getWallDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVect
     for (let n of neighbours) {
         const val = dotGrid.get(n.x, n.y);
         switch (val) {
+            // TODO: consider adding case for filled dots
             case Dot.VOID:
                 null;
                 break;
@@ -265,6 +280,8 @@ export class LogicGame {
     public player: Player;
     public ballPos: Point;
 
+    // TODO: track player characters in arr, alongside cooldowns (maybe in an interface?)
+
     constructor(h: number, w: number) {
         this.grid = new Grid(h, w);
         this.grid = addWalls(this.grid);
@@ -282,7 +299,7 @@ export class LogicGame {
 
     }
 
-    private singleMoveAbilities(adjVec: AdjVector, start: Point, character: Character): number[] {
+    private singleMoveAbilities(adjVec: AdjVector, start: Point, startVal: Dot, character: Character): number[] {
         const adjVecArr = Array.from(adjVec); // cast to arr or can't be -1
         let remapped
         switch (character) {
@@ -291,17 +308,26 @@ export class LogicGame {
                 remapped = adjVecArr.map((x, i) => ((x > 0) ? i : -1));
                 break;
             case (Character.MAGE):
-                // call 'getWallAdjMat' with custom neighbourhood
-                // will need to compute this s.t it wraps round (diff between p and p + 2n % (h,w))
+                const mm = mageAddMoore(start, this.grid.w - 2, this.grid.h - 2)
+                console.log(mm, startVal)
+                const mageNeighbourhood = (startVal == Dot.WALL) ? mm : addMoore(start)
+                const mageAdjFn = (startVal != Dot.WALL) ? getEmptyDotAdjVec : getWallDotAdjVec
+                const mAdjVec = mageAdjFn(start, this.grid, mageNeighbourhood)
+                const mAdjVecArr = Array.from(mAdjVec)
+                remapped = mAdjVecArr.map((x, i) => ((x == 1) ? i : -1));
+                // TODO: ensure old adjVec respected for mage and ranger abilities - comparing/mapping
+                // TODO: break into separate functions
                 break;
             case (Character.RANGER):
+                // call correct 'getAdjMat' for current point with custom neigbourhood (moore + 2* moore)
                 const m1 = addMoore(start)
                 const m2 = addMoore(start, 2)
-                const newNeighbourhood = m1.concat(m2)
-                const newAdjVec = getEmptyDotAdjVec(start, this.grid, newNeighbourhood)
+                const rangerNeighbourhood = m1.concat(m2)
+                // need to distinguish between wall or not
+                const rangerAdjFn = (startVal == Dot.EMPTY) ? getEmptyDotAdjVec : getWallDotAdjVec
+                const newAdjVec = rangerAdjFn(start, this.grid, rangerNeighbourhood)
                 const newAdjVecArr = Array.from(newAdjVec)
                 remapped = newAdjVecArr.map((x, i) => ((x == 1) ? i : -1));
-                // call correct 'getAdjMat' for current point wiht custom neigbourhood (moore + 2* moore)
                 break;
             default:
                 remapped = adjVecArr.map((x, i) => ((x == 1) ? i : -1));
@@ -312,9 +338,9 @@ export class LogicGame {
 
     public getValidMoves(start: Point, character: Character): Point[] {
         const startIdx = p_to_i(start, this.grid.w);
-        console.log(startIdx);
+        const startVal = this.grid.get(start.x, start.y)
         const adjVec: AdjVector = this.adjMat[startIdx];
-        const remapped = this.singleMoveAbilities(adjVec, start, character)
+        const remapped = this.singleMoveAbilities(adjVec, start, startVal, character)
 
         const nonZeroInds = remapped.filter((x) => x > -1);
         const validPoints: Point[] = nonZeroInds.map((x) => i_to_p(x, this.grid.w));
@@ -332,11 +358,14 @@ export class LogicGame {
 
         const newDotVal = this.grid.get(end.x, end.y);
         const over = (newDotVal == Dot.EMPTY) ? true : false;
-        this.grid.set(end.x, end.y, Dot.FILLED);
+        if (newDotVal != Dot.WALL) { // don't overwrite walls, important later (i.e for mage)
+            this.grid.set(end.x, end.y, Dot.FILLED);
+        }
         this.ballPos = end;
 
         const win = this.checkWin(end, this.player);
 
+        // orc ability here
         if (over && character != Character.ORC) { // switch to next player if turn over
             this.player = (1 - this.player);
         }
