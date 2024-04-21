@@ -2,7 +2,7 @@ import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/dots';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, DOT_SIZE, LINE_WIDTH, WinState } from '../interfaces/shared';
+import { Dot, Point, toGfxPos, DOT_SIZE, LINE_WIDTH, WinState, Colours, valToCol, Link } from '../interfaces/shared';
 import { i_to_p, p_to_i } from "../interfaces/shared";
 
 
@@ -13,7 +13,7 @@ const centerPoint = (p: Point): Point => {
 export class GameScene extends Phaser.Scene {
   private ball: Ball;
   private gfxDots: GraphicDot[];
-  private drawnLines: Phaser.GameObjects.Line[];
+  private drawnLines: Phaser.GameObjects.Line[] = [];
   private tmpLine: Phaser.GameObjects.Line;
   private validMoves: Point[] = [];
   private logicGame: LogicGame;
@@ -30,19 +30,24 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.logicGame = new LogicGame(11, 9);
     this.gfxDots = this.initDots(this.logicGame);
-    this.ball = new Ball(this, this.logicGame.ballPos);
+
+    const ballPos = this.logicGame.ballPos
+    this.ball = new Ball(this, ballPos);
+
     this.tmpLine = this.initLine()
     this.add.existing(this.tmpLine)
-    this.handleMoveEnd();
+
+    this.handleMoveEnd(ballPos, ballPos);
   }
 
   // ============ GAME LOGIC ===========
-  handleMoveEnd(): void {
-    // move ball, update player banner, highlight valid moves
+  handleMoveEnd(start: Point, end: Point): void {
     this.setHighlightValidMoves(this.validMoves, false);
     const ballPos = this.logicGame.ballPos;
     this.ball.move(ballPos)
     this.gfxDots[p_to_i(ballPos, this.logicGame.grid.w)].updateVal(Dot.FILLED)
+
+    this.makePermanentLine(start, end)
 
     const validMoves = this.logicGame.getValidMoves(ballPos);
     this.validMoves = validMoves;
@@ -82,7 +87,7 @@ export class GameScene extends Phaser.Scene {
     if (summary.winState != WinState.NONE) {
       console.log("Game over, " + summary.winState.toString())
     }
-    this.handleMoveEnd()
+    this.handleMoveEnd(ballPoint, queryPoint)
   }
 
 
@@ -142,6 +147,19 @@ export class GameScene extends Phaser.Scene {
 
   hideTempLine(): void {
     this.tmpLine.visible = false;
+  }
+
+  makePermanentLine(start: Point, end: Point): void {
+    const startGfx = centerPoint(toGfxPos(start));
+    const endGfx = centerPoint(toGfxPos(end));
+
+    const c = Phaser.Display.Color.HexStringToColor(valToCol[1]); //TODO: make less bad
+    const colour = Phaser.Display.Color.GetColor32(c.red, c.green, c.blue, c.alpha);
+    const tmpLine = this.createLine(startGfx.x, startGfx.y, endGfx.x, endGfx.y, colour, 2 * LINE_WIDTH, true)
+    tmpLine.setTo(startGfx.x, startGfx.y, endGfx.x, endGfx.y);
+
+    this.drawnLines.push(tmpLine)
+    this.add.existing(tmpLine)
   }
 
 
