@@ -78,6 +78,14 @@ export interface ImageConstructor {
     frame?: string | number;
 }
 
+export const i_to_p = (i: number, nx: number): Point => {
+    return { x: Math.floor(i / nx), y: i % nx };
+}
+
+export const p_to_i = (p: Point, nx: number): number => {
+    return p.y * nx + p.x;
+}
+
 
 export const toGfxPos = (logicPos: Point): Point => {
     const l = DOT_SPACING;

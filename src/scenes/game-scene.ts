@@ -1,8 +1,9 @@
 import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/dots';
 import { Ball } from '../objects/ball';
-import { LogicGame } from '../logic/board';
+import { LogicGame, } from '../logic/board';
 import { Dot } from '../interfaces/shared';
+import { i_to_p, p_to_i } from "../interfaces/shared";
 
 export class GameScene extends Phaser.Scene {
   private ball: Ball;
@@ -13,7 +14,7 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
-  preload(): void {
+  preload(): void { // load my assets in here later
     this.load.image('redhat', '../assets/redhat.png');
     this.load.image('redParticle', '../assets/red.png');
   }
@@ -30,16 +31,21 @@ export class GameScene extends Phaser.Scene {
     for (let y = 0; y < game.grid.h; y++) {
       for (let x = 0; x < game.grid.w; x++) {
         const val = game.grid.get(x, y);
-        if (val != Dot.VOID) {
-          const tmpDot = new GraphicDot({ scene: this, logicPos: { x: x, y: y }, val: val });
-          dots.push(tmpDot);
-        }
+        const tmpDot = new GraphicDot({ scene: this, logicPos: { x: x, y: y }, val: val });
+        dots.push(tmpDot);
       }
     }
     return dots;
   }
 
   onBallHover(): void {
-    console.log('foo bar');
+    const ballPos = this.logicGame.ballPos
+    const validMoves = this.logicGame.getValidMoves(ballPos)
+    for (let p of validMoves) {
+      console.log(p)
+      const idx = p_to_i(p, this.logicGame.grid.w);
+      this.gfxDots[idx].onPointerDown();
+    }
+    console.log(validMoves);
   }
 }

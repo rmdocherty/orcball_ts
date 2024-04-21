@@ -1,5 +1,5 @@
 import { Point, DotsConstructor, valToCol, toGfxPos } from "../interfaces/shared";
-import { DOT_SIZE, DOT_SPACING, OFFSET } from "../interfaces/shared";
+import { DOT_SIZE, DOT_SPACING, OFFSET, Dot } from "../interfaces/shared";
 
 export class GraphicDot extends Phaser.GameObjects.Container {
     logicPos: Point;
@@ -26,7 +26,12 @@ export class GraphicDot extends Phaser.GameObjects.Container {
         this.moveUp(this.innerDot); // depth sorting for container
         this.outerDot.visible = false; // hide initially
 
-        this.initInputs();
+        if (params.val == Dot.VOID) {
+            this.innerDot.visible = false;
+        } else {
+            this.initInputs();
+        }
+
 
         this.scene.add.existing(this);
     }
@@ -41,7 +46,7 @@ export class GraphicDot extends Phaser.GameObjects.Container {
         }
     }
 
-    private onPointerDown(): void {
+    public onPointerDown(): void {
         this.outerDot.visible = true;
     }
 

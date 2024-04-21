@@ -27,6 +27,7 @@ The game can then be stored entirely based on these two objects, the current pla
 */
 
 import { Point, Dot, Link, Player, MoveSummary, WinState } from "../interfaces/shared";
+import { i_to_p, p_to_i } from "../interfaces/shared";
 
 
 
@@ -71,14 +72,6 @@ const moore: Point[] = [
 const addMoore = (p: Point): Point[] => {
     // list of all points in moore neighbourhood of p
     return moore.map((m) => ({ x: m.x + p.x, y: m.y + p.y }));
-}
-
-const i_to_p = (i: number, nx: number): Point => {
-    return { x: Math.floor(i / nx), y: i % nx };
-}
-
-const p_to_i = (p: Point, nx: number): number => {
-    return p.y * nx + p.x;
 }
 
 const addWalls = (dotGrid: Grid): Grid => {
@@ -283,6 +276,17 @@ export class LogicGame {
         this.player = Player.P1;
         this.ballPos = { x: 4, y: 5 };
 
+    }
+
+    public getValidMoves(start: Point): Point[] {
+        const startIdx = p_to_i(start, this.grid.w)
+        const adjVec: AdjVector = this.adjMat[startIdx]
+        const adjVecArr = Array.from(adjVec) // cast to arr or can't be -1
+
+        const remapped = adjVecArr.map((x, i) => ((x > 0) ? i : -1))
+        const nonZeroInds = remapped.filter((x) => x > -1)
+        const validPoints: Point[] = nonZeroInds.map((x) => i_to_p(x, this.grid.w))
+        return validPoints
     }
 
     public makeMove(start: Point, end: Point): MoveSummary {

@@ -19,7 +19,6 @@ export class Ball extends Phaser.GameObjects.Ellipse {
     }
 
     onPointerOver(): void {
-        this.setScale(1.5);
         this.emit('hover', this)
     }
 
