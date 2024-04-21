@@ -72,6 +72,13 @@ export class GraphicDot extends Phaser.GameObjects.Container {
         this.outerDot.fillColor = this.outerColor
     }
 
+    public updateVal(newVal: Dot): void {
+        const c = Phaser.Display.Color.HexStringToColor(valToCol[newVal]);
+        this.innerColor = Phaser.Display.Color.GetColor32(c.red, c.green, c.blue, c.alpha);
+        this.innerDot.fillColor = this.innerColor
+    }
+
+
     private onPointerOver(): void {
         this.grow()
         this.emit('dot_hover_on', this);

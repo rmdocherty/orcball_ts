@@ -286,7 +286,7 @@ export class LogicGame {
         const adjVec: AdjVector = this.adjMat[startIdx];
         const adjVecArr = Array.from(adjVec); // cast to arr or can't be -1
 
-        const remapped = adjVecArr.map((x, i) => ((x > 0) ? i : -1));
+        const remapped = adjVecArr.map((x, i) => ((x == 1) ? i : -1));
         const nonZeroInds = remapped.filter((x) => x > -1);
         const validPoints: Point[] = nonZeroInds.map((x) => i_to_p(x, this.grid.w));
         return validPoints;

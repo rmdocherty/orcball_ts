@@ -2,7 +2,7 @@ import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/dots';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, DOT_SIZE, LINE_WIDTH } from '../interfaces/shared';
+import { Dot, Point, toGfxPos, DOT_SIZE, LINE_WIDTH, WinState } from '../interfaces/shared';
 import { i_to_p, p_to_i } from "../interfaces/shared";
 
 
@@ -42,6 +42,8 @@ export class GameScene extends Phaser.Scene {
     this.setHighlightValidMoves(this.validMoves, false);
     const ballPos = this.logicGame.ballPos;
     this.ball.move(ballPos)
+    this.gfxDots[p_to_i(ballPos, this.logicGame.grid.w)].updateVal(Dot.FILLED)
+
     const validMoves = this.logicGame.getValidMoves(ballPos);
     this.validMoves = validMoves;
     console.log(validMoves)
@@ -76,10 +78,10 @@ export class GameScene extends Phaser.Scene {
     if (!this.checkPointValid(queryPoint)) {
       return
     }
-    // update game
-    // handle turn end
-    console.log('foo')
     const summary = this.logicGame.makeMove(ballPoint, queryPoint)
+    if (summary.winState != WinState.NONE) {
+      console.log("Game over, " + summary.winState.toString())
+    }
     this.handleMoveEnd()
   }
 
@@ -104,11 +106,20 @@ export class GameScene extends Phaser.Scene {
 
   initLine(): Phaser.GameObjects.Line {
     const lineColour = Phaser.Display.Color.GetColor32(245, 234, 240, 100);
-    const tmpLine = new Phaser.GameObjects.Line(this, 0, 0, 100, 100, 150, 150, lineColour, 0)
-    tmpLine.setLineWidth(2 * LINE_WIDTH, 2 * LINE_WIDTH)
-    tmpLine.visible = false
-    tmpLine.setDepth(-10)
+    //const tmpLine = new Phaser.GameObjects.Line(this, 0, 0, 100, 100, 150, 150, lineColour, 0)
+    //tmpLine.setLineWidth(2 * LINE_WIDTH, 2 * LINE_WIDTH)
+    //tmpLine.visible = false
+    //tmpLine.setDepth(-10)
+    const tmpLine = this.createLine(0, 0, 0, 0, lineColour, 2 * LINE_WIDTH, false)
     return tmpLine
+  }
+
+  createLine(x0: number, y0: number, x1: number, y1: number, color: number, width: number, visible: boolean = false): Phaser.GameObjects.Line {
+    const tmpLine = new Phaser.GameObjects.Line(this, 0, 0, 100, 100, 150, 150, color, 0);
+    tmpLine.setLineWidth(width, width);
+    tmpLine.visible = visible;
+    tmpLine.setDepth(-10);
+    return tmpLine;
   }
 
   setHighlightValidMoves(validMoves: Point[], on: boolean = true): void {
