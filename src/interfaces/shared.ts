@@ -4,13 +4,13 @@ const DEFAULT_H = 11
 //iphone SE dims times 2
 export const GAME_W = 375 * 2
 export const GAME_H = 667 * 2
-export const DOT_SPACING = 75
+export const DOT_SPACING = 68
 export const DOT_SIZE = 20
 export const LINE_WIDTH = 4
 export const BANNER_H = 48
 export const OFFSET: Point = {
-    x: (GAME_W - (DEFAULT_W * DOT_SPACING)),
-    y: (GAME_H - (DEFAULT_H * DOT_SPACING)) / 2
+    x: (GAME_W - (DEFAULT_W * DOT_SPACING) - 36),
+    y: (GAME_H - (DEFAULT_H * DOT_SPACING) + 20) / 2
 }
 
 export interface Point {

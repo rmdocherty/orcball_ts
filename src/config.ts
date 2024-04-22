@@ -6,7 +6,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   title: 'Orcball',
   url: 'https://github.com/rmdocherty/orcball_ts',
   version: '0.0.1',
-  backgroundColor: 0x3a404d,
+  backgroundColor: 0x8b9150,
   type: Phaser.AUTO,
   scale: {
     mode: Phaser.Scale.FIT, // maybe use RESIZE mode?
@@ -22,5 +22,6 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
       gravity: { x: 0, y: -100 }
     }
   },
+  antialias: false,
   scene: [GameScene] // entrypoint
 };

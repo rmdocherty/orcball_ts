@@ -19,6 +19,11 @@ export class GameScene extends Phaser.Scene {
   private drawnLines: Phaser.GameObjects.Line[] = [];
   private tmpLine: Phaser.GameObjects.Line;
   private playerBanner: Phaser.GameObjects.Rectangle;
+  private bgImage: Phaser.GameObjects.Image;
+  private walls: Phaser.GameObjects.Image;
+
+  private p1Sprite: Phaser.GameObjects.Sprite;
+
 
   private validMoves: Point[] = [];
   private logicGame: LogicGame;
@@ -28,11 +33,24 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload(): void { // load my assets in here later
-    this.load.image('redhat', '../assets/redhat.png');
-    this.load.image('redParticle', '../assets/red.png');
+    this.load.image('bg', '../assets/tiles/bg.png')
+    this.load.image('walls', '../assets/tiles/walls.png')
   }
 
+  // TODO: shrink sides of map by 1 tile
+
   create(): void {
+    this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
+    this.bgImage.setScale(4, 4)
+    this.bgImage.setDepth(-100)
+    this.add.existing(this.bgImage)
+
+    this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'walls')
+    this.walls.setScale(4, 4)
+    this.bgImage.setDepth(-100)
+    this.add.existing(this.walls)
+
+
     this.logicGame = new LogicGame(11, 9);
     this.gfxDots = this.initDots(this.logicGame);
 
@@ -45,6 +63,8 @@ export class GameScene extends Phaser.Scene {
     const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
     this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
     this.add.existing(this.playerBanner)
+
+
 
     this.handleMoveEnd(ballPos, ballPos);
   }
