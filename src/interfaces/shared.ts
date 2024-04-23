@@ -4,14 +4,15 @@ const DEFAULT_H = 11
 //iphone SE dims times 2
 export const GAME_W = 375 * 2
 export const GAME_H = 667 * 2
-export const DOT_SPACING = 88
+export const DOT_SPACING = 96
 export const DOT_SIZE = 20
 export const LINE_WIDTH = 4
 export const BANNER_H = 48
 export const OFFSET: Point = {
-    x: (GAME_W - (DEFAULT_W * DOT_SPACING) + 64),
+    x: (GAME_W - (DEFAULT_W * DOT_SPACING) + 104),
     y: (GAME_H - (DEFAULT_H * DOT_SPACING) + 14) / 2
 }
+export const SF = 6
 
 export interface Point {
     x: number;
@@ -52,7 +53,13 @@ export enum Character {
     PREIST
 }
 
-export const characterNames = ["Foo", "Warrior", "Mage", "Orc", "Ranger", "Dwarf", "Priest"]
+export const characterNames = ["warrior", "mage", "orc", "ranger"]
+
+export interface PlayerDetails {
+    character: Character,
+    cooldownLength: number,
+    movesBeforeCooldown: number;
+}
 
 export enum WinState {
     NONE = 0,

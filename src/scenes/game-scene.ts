@@ -3,7 +3,7 @@ import { GraphicDot } from '../objects/dots';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
 import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character } from '../interfaces/shared';
-import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H } from '../interfaces/shared';
+import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
 
 
@@ -22,7 +22,7 @@ export class GameScene extends Phaser.Scene {
   private bgImage: Phaser.GameObjects.Image;
   private walls: Phaser.GameObjects.Image;
 
-  private p1Sprite: Phaser.GameObjects.Image;
+  private p1Sprite: Phaser.GameObjects.Sprite;
 
 
   private validMoves: Point[] = [];
@@ -35,19 +35,21 @@ export class GameScene extends Phaser.Scene {
   preload(): void { // load my assets in here later
     this.load.image('bg', '../assets/tiles/bg.png')
     this.load.image('walls', '../assets/tiles/walls.png')
-    this.load.image('ranger', '../assets/raw/ranger.png')
+    this.load.aseprite('ranger', '../assets/characters/orc.png', '../assets/characters/orc.json')
+
   }
+
 
   // TODO: shrink sides of map by 1 tile
 
   create(): void {
     this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
-    this.bgImage.setScale(5.5, 5.5)
+    this.bgImage.setScale(SF, SF)
     this.bgImage.setDepth(-100)
     this.add.existing(this.bgImage)
 
-    this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'walls')
-    this.walls.setScale(5.5, 5.5)
+    this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2 + 30, 'walls')
+    this.walls.setScale(SF, SF)
     this.bgImage.setDepth(-100)
     this.add.existing(this.walls)
 
@@ -63,14 +65,17 @@ export class GameScene extends Phaser.Scene {
 
     const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
     this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
-    this.add.existing(this.playerBanner)
+    //this.add.existing(this.playerBanner)
 
-    this.p1Sprite = new Phaser.GameObjects.Image(this, 150, 1100, 'ranger')
-    this.p1Sprite.setScale(7, 7)
+    const tags = this.anims.createFromAseprite('ranger')
+    console.log(tags)
+
+    this.p1Sprite = new Phaser.GameObjects.Sprite(this, 150, 1100, 'ranger')
+    this.p1Sprite.setScale(SF + 1, SF + 1)
     this.add.existing(this.p1Sprite)
+    console.log(this.p1Sprite)
 
-
-
+    this.p1Sprite.play({ key: 'passive', repeat: -1 })
     this.handleMoveEnd(ballPos, ballPos);
   }
 
