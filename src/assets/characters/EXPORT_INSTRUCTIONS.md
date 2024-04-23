@@ -1,3 +1,5 @@
+EACH ANIM (EVEN FOR SEPARATE SPRITES) MUST HAVE THEIR OWN UNIQUE TAG IN ASEPRITE
+
 Layout:
     Sheet Type: Packed
     Constraints: None
