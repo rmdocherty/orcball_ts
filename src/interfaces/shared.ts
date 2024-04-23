@@ -49,11 +49,7 @@ export enum Character {
     MAGE,
     ORC,
     RANGER,
-    DWARF,
-    PREIST
 }
-
-export const characterNames = ["warrior", "mage", "orc", "ranger"]
 
 export interface PlayerDetails {
     character: Character,

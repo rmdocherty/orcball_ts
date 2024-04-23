@@ -26,7 +26,7 @@ multidimensional indexing (i.e y, x lookup) ourselves. We will use the y, x conv
 The game can then be stored entirely based on these two objects, the current player and the ball position.
 */
 
-import { Point, Dot, Link, Player, MoveSummary, WinState, Character } from "../interfaces/shared";
+import { Point, Dot, Link, Player, MoveSummary, WinState, Character, PlayerDetails } from "../interfaces/shared";
 import { i_to_p, p_to_i } from "../interfaces/shared";
 
 
@@ -295,6 +295,12 @@ export const init = (): void => {
     }
 }
 
+const getPlayerDetails = (character: Character): PlayerDetails => {
+    const cooldowns = [5, 5, 5, 5]
+    return { character: character, cooldownLength: cooldowns[character], movesBeforeCooldown: 0 }
+}
+
+
 export class LogicGame {
     public grid: Grid;
     public adjMat: AdjMatrix;
@@ -305,9 +311,12 @@ export class LogicGame {
     public player: Player;
     public ballPos: Point;
 
+    public p1Details: PlayerDetails;
+    public p2Details: PlayerDetails;
+
     // TODO: track player characters in arr, alongside cooldowns (maybe in an interface?)
 
-    constructor(h: number, w: number) {
+    constructor(h: number, w: number, p1Character: Character = Character.WARRIOR, p2Character: Character = Character.WARRIOR) {
         this.grid = new Grid(h, w);
         this.grid = addWalls(this.grid);
 
@@ -321,6 +330,9 @@ export class LogicGame {
         this.ballPos = { x: 4, y: 5 };
         // this needs to be filled @ start
         this.grid.set(this.ballPos.x, this.ballPos.y, Dot.FILLED);
+
+        this.p1Details = getPlayerDetails(p1Character)
+        this.p2Details = getPlayerDetails(p1Character)
 
     }
 
@@ -367,21 +379,41 @@ export class LogicGame {
         this.adjMat[endIdx][startIdx] = Link.FILLED;
 
         const newDotVal = this.grid.get(end.x, end.y);
-        const over = (newDotVal == Dot.EMPTY) ? true : false;
+        // orc ability here
+        const over = ((newDotVal == Dot.EMPTY) && (character != Character.ORC)) ? true : false;
         if (newDotVal != Dot.WALL) { // don't overwrite walls, important later (i.e for mage)
             this.grid.set(end.x, end.y, Dot.FILLED);
         }
         this.ballPos = end;
 
-        const win = this.checkWin(end, this.player);
+        const abilityUsed = (character != Character.NONE)
+        this.updateCooldowns(this.player, abilityUsed)
 
-        // orc ability here
-        if (over && character != Character.ORC) { // switch to next player if turn over
+        const win = this.checkWin(end, this.player);
+        if (over) { // switch to next player if turn over
             this.player = (1 - this.player);
         }
 
         return { winState: win, moveOver: over };
     }
+
+    public updateCooldowns(currentPlayer: Player, abilityUsed: boolean): void {
+        let c: number
+        if (currentPlayer == Player.P1) {
+            c = this.p2Details.movesBeforeCooldown
+            this.p2Details.movesBeforeCooldown = Math.max(0, c - 1)
+            if (abilityUsed) {
+                this.p1Details.movesBeforeCooldown = this.p1Details.cooldownLength
+            }
+        } else {
+            c = this.p1Details.movesBeforeCooldown
+            this.p1Details.movesBeforeCooldown = Math.max(0, c - 1)
+            if (abilityUsed) {
+                this.p2Details.movesBeforeCooldown = this.p2Details.cooldownLength
+            }
+        }
+    }
+
 
     public checkWin(newBallPos: Point, player: Player): WinState {
         const inP1Goal = (newBallPos.x === this.p1Goal.x && newBallPos.y === this.p1Goal.y);
