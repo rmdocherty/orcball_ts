@@ -22,7 +22,7 @@ export class GameScene extends Phaser.Scene {
   private bgImage: Phaser.GameObjects.Image;
   private walls: Phaser.GameObjects.Image;
 
-  private p1Sprite: Phaser.GameObjects.Sprite;
+  private p1Sprite: Phaser.GameObjects.Image;
 
 
   private validMoves: Point[] = [];
@@ -35,18 +35,19 @@ export class GameScene extends Phaser.Scene {
   preload(): void { // load my assets in here later
     this.load.image('bg', '../assets/tiles/bg.png')
     this.load.image('walls', '../assets/tiles/walls.png')
+    this.load.image('ranger', '../assets/raw/ranger.png')
   }
 
   // TODO: shrink sides of map by 1 tile
 
   create(): void {
     this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
-    this.bgImage.setScale(4, 4)
+    this.bgImage.setScale(5.5, 5.5)
     this.bgImage.setDepth(-100)
     this.add.existing(this.bgImage)
 
     this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'walls')
-    this.walls.setScale(4, 4)
+    this.walls.setScale(5.5, 5.5)
     this.bgImage.setDepth(-100)
     this.add.existing(this.walls)
 
@@ -63,6 +64,10 @@ export class GameScene extends Phaser.Scene {
     const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
     this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
     this.add.existing(this.playerBanner)
+
+    this.p1Sprite = new Phaser.GameObjects.Image(this, 150, 1100, 'ranger')
+    this.p1Sprite.setScale(7, 7)
+    this.add.existing(this.p1Sprite)
 
 
 
