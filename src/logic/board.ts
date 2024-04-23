@@ -295,9 +295,9 @@ export const init = (): void => {
     }
 }
 
-const getPlayerDetails = (character: Character): PlayerDetails => {
+const getPlayerDetails = (character: Character, player: Player): PlayerDetails => {
     const cooldowns = [5, 5, 5, 5]
-    return { character: character, cooldownLength: cooldowns[character], movesBeforeCooldown: 0 }
+    return { player: player, character: character, cooldownLength: cooldowns[character], movesBeforeCooldown: 0 }
 }
 
 
@@ -331,8 +331,8 @@ export class LogicGame {
         // this needs to be filled @ start
         this.grid.set(this.ballPos.x, this.ballPos.y, Dot.FILLED);
 
-        this.p1Details = getPlayerDetails(p1Character)
-        this.p2Details = getPlayerDetails(p1Character)
+        this.p1Details = getPlayerDetails(p1Character, Player.P1)
+        this.p2Details = getPlayerDetails(p2Character, Player.P2)
 
     }
 

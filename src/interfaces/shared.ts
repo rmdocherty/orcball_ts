@@ -46,12 +46,15 @@ export enum Player {
 export enum Character {
     NONE = -1,
     WARRIOR = 0,
-    MAGE,
     ORC,
+    MAGE,
     RANGER,
 }
 
+export const CHAR_NAMES = ["warrior", "orc", "mage", "ranger"]
+
 export interface PlayerDetails {
+    player: Player,
     character: Character,
     cooldownLength: number,
     movesBeforeCooldown: number;

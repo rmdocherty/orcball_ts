@@ -1,8 +1,9 @@
 import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/dots';
+import { AbilityButton } from '../objects/button';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character } from '../interfaces/shared';
+import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
 
@@ -22,7 +23,12 @@ export class GameScene extends Phaser.Scene {
   private bgImage: Phaser.GameObjects.Image;
   private walls: Phaser.GameObjects.Image;
 
+  private p1Button: AbilityButton
+  private p2Button: AbilityButton
+
+  private tags: Phaser.Animations.Animation[][] = []
   private p1Sprite: Phaser.GameObjects.Sprite;
+  private p2Sprite: Phaser.GameObjects.Sprite;
 
 
   private validMoves: Point[] = [];
@@ -35,26 +41,40 @@ export class GameScene extends Phaser.Scene {
   preload(): void { // load my assets in here later
     this.load.image('bg', '../assets/tiles/bg.png')
     this.load.image('walls', '../assets/tiles/walls.png')
-    this.load.aseprite('ranger', '../assets/characters/orc.png', '../assets/characters/orc.json')
+    for (let btn of ["p1_button", "p2_button"]) {
+      this.load.image(btn, '../assets/buttons/' + btn + '.png')
+    }
 
+    for (let icon of CHAR_NAMES) {
+      this.load.image(icon + "_ability", '../assets/non_cc/' + icon + '_ability.png')
+    }
+    for (let sprite of CHAR_NAMES) {
+      this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
+    }
   }
 
 
   // TODO: shrink sides of map by 1 tile
 
   create(): void {
+
+    for (let name of CHAR_NAMES) {
+      const tag = this.anims.createFromAseprite(name);
+      this.tags.push(tag)
+    }
+
     this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
     this.bgImage.setScale(SF, SF)
     this.bgImage.setDepth(-100)
     this.add.existing(this.bgImage)
 
+    // TODO: make walls semi translucent when mouse over the boudns/over dots on bounds
     this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2 + 30, 'walls')
     this.walls.setScale(SF, SF)
     this.bgImage.setDepth(-100)
     this.add.existing(this.walls)
 
-
-    this.logicGame = new LogicGame(11, 9);
+    this.logicGame = new LogicGame(11, 9, Character.MAGE, Character.ORC);
     this.gfxDots = this.initDots(this.logicGame);
 
     const ballPos = this.logicGame.ballPos
@@ -65,17 +85,14 @@ export class GameScene extends Phaser.Scene {
 
     const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
     this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
-    //this.add.existing(this.playerBanner)
+    this.add.existing(this.playerBanner)
 
-    const tags = this.anims.createFromAseprite('ranger')
-    console.log(tags)
+    this.p1Button = new AbilityButton(this, 640, 1160, this.logicGame.p1Details)
+    this.add.existing(this.p1Button)
+    this.p2Button = new AbilityButton(this, 110, 136, this.logicGame.p2Details)
+    this.add.existing(this.p2Button)
 
-    this.p1Sprite = new Phaser.GameObjects.Sprite(this, 150, 1100, 'ranger')
-    this.p1Sprite.setScale(SF + 1, SF + 1)
-    this.add.existing(this.p1Sprite)
-    console.log(this.p1Sprite)
-
-    this.p1Sprite.play({ key: 'passive', repeat: -1 })
+    this.initAnims();
     this.handleMoveEnd(ballPos, ballPos);
   }
 
@@ -121,7 +138,7 @@ export class GameScene extends Phaser.Scene {
     if (!this.checkPointValid(queryPoint)) {
       return
     }
-    const summary = this.logicGame.makeMove(ballPoint, queryPoint, Character.NONE)
+    const summary = this.logicGame.makeMove(ballPoint, queryPoint, Character.RANGER)
     if (summary.moveOver == true) {
       const newPlayer = this.logicGame.player
       const newColourHex = (newPlayer == Player.P1) ? Colours.P1_COL : Colours.P2_COL
@@ -158,6 +175,27 @@ export class GameScene extends Phaser.Scene {
     const lineColour = Phaser.Display.Color.GetColor32(245, 234, 240, 100);
     const tmpLine = this.createLine(0, 0, 0, 0, lineColour, 2 * LINE_WIDTH, false)
     return tmpLine
+  }
+
+  initAnims(): void {
+
+    const pos = [{ x: 120, y: 1100 }, { x: 650, y: 70 }];
+    const details = [this.logicGame.p1Details, this.logicGame.p2Details];
+    for (let i = 0; i < 2; i++) {
+
+      const c = CHAR_NAMES[details[i].character as unknown as number]
+      console.log(c)
+      const spr = new Phaser.GameObjects.Sprite(this, pos[i].x, pos[i].y, c);
+      spr.setScale(SF + 1, SF + 1);
+      spr.play({ key: c + '_passive', repeat: -1 });
+      if (i == 0) {
+        this.p1Sprite = spr;
+      } else {
+        spr.setFlipX(true);
+        this.p2Sprite = spr;
+      }
+      this.add.existing(spr);
+    }
   }
 
   createLine(x0: number, y0: number, x1: number, y1: number, color: number, width: number, visible: boolean = false): Phaser.GameObjects.Line {
