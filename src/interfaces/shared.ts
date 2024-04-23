@@ -74,7 +74,7 @@ export interface MoveSummary {
 
 export enum Colours {
     LIGHT_GREY = "#bfbbae",
-    YELLOW = "#e3ad30",
+    YELLOW = "#fbf236",
     DARK_GREY = "#4f4d46",
     ORANGE = "#e65000",
     WHITE = "#ffffff",

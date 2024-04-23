@@ -128,15 +128,17 @@ export class GameScene extends Phaser.Scene {
   // ============ EVENTS ===========
 
   onDotHover(dot: GraphicDot): void {
-    const ballPoint = this.logicGame.ballPos
-    const queryPoint = dot.logicPos
+    const ballPoint = this.logicGame.ballPos;
+    const queryPoint = dot.logicPos;
     if (this.checkPointValid(queryPoint)) {
-      this.drawTempLine(ballPoint, queryPoint)
+      dot.grow();
+      this.drawTempLine(ballPoint, queryPoint);
     }
   }
 
   onDotHoverOff(dot: GraphicDot): void {
     this.hideTempLine()
+    this.setHighlightValidMoves(this.validMoves)
   }
 
   onDotClick(dot: GraphicDot): void {
