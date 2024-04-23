@@ -39,7 +39,10 @@ export class GraphicDot extends Phaser.GameObjects.Sprite {
     }
 
     public updateVal(val: Dot): void {
-        return
+        const dotIdx = val as unknown as number;
+        const name = dotNames[dotIdx]
+        this.setTexture(name)
+        this.name = name
     }
 
     public highlight(): void {

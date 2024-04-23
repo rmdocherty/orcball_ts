@@ -112,7 +112,7 @@ export class GameScene extends Phaser.Scene {
 
     this.makePermanentLine(start, end)
 
-    const validMoves = this.logicGame.getValidMoves(ballPos, Character.RANGER);
+    const validMoves = this.logicGame.getValidMoves(ballPos, Character.NONE);
     this.validMoves = validMoves;
     this.setHighlightValidMoves(validMoves, true);
   }
@@ -147,7 +147,7 @@ export class GameScene extends Phaser.Scene {
     if (!this.checkPointValid(queryPoint)) {
       return
     }
-    const summary = this.logicGame.makeMove(ballPoint, queryPoint, Character.RANGER)
+    const summary = this.logicGame.makeMove(ballPoint, queryPoint, Character.NONE)
     if (summary.moveOver == true) {
       const newPlayer = this.logicGame.player
       const newColourHex = (newPlayer == Player.P1) ? Colours.P1_COL : Colours.P2_COL
