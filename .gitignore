@@ -8,3 +8,4 @@ node_modules/
 .DS_STORE
 
 *raw*
+*non_cc*
