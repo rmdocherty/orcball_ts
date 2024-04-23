@@ -1,9 +1,9 @@
 import { Redhat } from '../objects/redhat';
-import { GraphicDot } from '../objects/dots';
+import { GraphicDot } from '../objects/pixel_dots';
 import { AbilityButton } from '../objects/button';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES } from '../interfaces/shared';
+import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
 
@@ -51,6 +51,9 @@ export class GameScene extends Phaser.Scene {
     for (let sprite of CHAR_NAMES) {
       this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
     }
+    for (let name of DOT_NAMES) {
+      this.load.aseprite(name, '../assets/tiles/' + name + '_dot.png', '../assets/tiles/' + name + '_dot.json')
+    }
   }
 
 
@@ -59,6 +62,10 @@ export class GameScene extends Phaser.Scene {
   create(): void {
 
     for (let name of CHAR_NAMES) {
+      const tag = this.anims.createFromAseprite(name);
+      this.tags.push(tag)
+    }
+    for (let name of DOT_NAMES) {
       const tag = this.anims.createFromAseprite(name);
       this.tags.push(tag)
     }
@@ -178,7 +185,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   initAnims(): void {
-
+    // TODO: only play anims of activte player
     const pos = [{ x: 120, y: 1100 }, { x: 650, y: 70 }];
     const details = [this.logicGame.p1Details, this.logicGame.p2Details];
     for (let i = 0; i < 2; i++) {
@@ -241,6 +248,4 @@ export class GameScene extends Phaser.Scene {
     this.add.existing(tmpLine)
   }
 
-  //TODO: add player colour banner @ bottom
-  // add abilities: shape icon for player, ability button on bottom
 }

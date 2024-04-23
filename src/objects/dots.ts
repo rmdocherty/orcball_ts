@@ -15,6 +15,7 @@ export class GraphicDot extends Phaser.GameObjects.Container {
     innerColor: number;
     outerColor: number;
 
+
     constructor(params: DotsConstructor) {
         super(params.scene);
         this.logicPos = params.logicPos;

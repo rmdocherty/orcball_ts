@@ -27,6 +27,7 @@ export enum Dot {
     GOAL,
     VOID
 }
+export const DOT_NAMES = ["empty", "filled", "wall", "goal"]
 
 export enum Link {
     // State of connection between dots
