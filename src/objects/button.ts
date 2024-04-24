@@ -30,6 +30,8 @@ export class AbilityButton extends Phaser.GameObjects.Container {
 
         this.cooldownText.visible = false;
 
+        this.button.postFX.addShadow(0, 2, 0.01)
+
         this.setScales(SF);
         this.initInputs();
 

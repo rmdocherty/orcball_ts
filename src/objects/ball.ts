@@ -18,6 +18,7 @@ export class Ball extends Phaser.GameObjects.Sprite {
         this.anims.pause()
 
         this.scene.add.existing(this)
+        this.postFX.addShadow(0, 2, 0.01)
     }
 
     move(oldPos: Point, newPos: Point): void {
