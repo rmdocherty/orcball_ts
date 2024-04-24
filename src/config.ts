@@ -1,4 +1,5 @@
 import { GameScene } from './scenes/game-scene';
+import { MenuScene } from './scenes/menu-scene';
 import { GAME_H, GAME_W } from './interfaces/shared';
 
 // TODO: have 2 different configs for mobile and desktop?
@@ -23,5 +24,5 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
     }
   },
   antialias: false,
-  scene: [GameScene] // entrypoint
+  scene: [MenuScene] // entrypoint
 };

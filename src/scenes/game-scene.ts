@@ -75,7 +75,7 @@ export class GameScene extends Phaser.Scene {
 
     this.initBG()
 
-    this.logicGame = new LogicGame(11, 9, Character.RANGER, Character.MAGE);
+    this.logicGame = new LogicGame(11, 9, Character.WARRIOR, Character.ORC);
     this.gfxDots = this.initDots(this.logicGame);
 
     const ballPos = this.logicGame.ballPos
