@@ -15,6 +15,7 @@ const centerPoint = (p: Point): Point => {
 
 
 
+
 export class GameScene extends Phaser.Scene {
   private ball: Ball;
   private gfxDots: GraphicDot[];
@@ -31,7 +32,7 @@ export class GameScene extends Phaser.Scene {
   private p1Sprite: Phaser.GameObjects.Sprite;
   private p2Sprite: Phaser.GameObjects.Sprite;
 
-
+  private abilityActive: boolean = false
   private validMoves: Point[] = [];
   private logicGame: LogicGame;
 
@@ -88,8 +89,10 @@ export class GameScene extends Phaser.Scene {
     this.add.existing(this.playerBanner)
 
     this.p1Button = new AbilityButton(this, 640, 1160, this.logicGame.p1Details)
+    this.p1Button.on('ability_clicked', this.onButtonPress.bind(this))
     this.add.existing(this.p1Button)
     this.p2Button = new AbilityButton(this, 110, 136, this.logicGame.p2Details)
+    this.p2Button.on('ability_clicked', this.onButtonPress.bind(this))
     this.add.existing(this.p2Button)
 
     this.initAnims();
@@ -110,7 +113,7 @@ export class GameScene extends Phaser.Scene {
     const validMoves = this.logicGame.getValidMoves(ballPos, Character.NONE);
     this.validMoves = validMoves;
     this.setHighlightValidMoves(validMoves, true);
-    this.pauseResumeSprites(this.logicGame.player);
+    this.updatePlayers(this.logicGame.player);
   }
 
   checkPointValid(queryPoint: Point): boolean {
@@ -119,6 +122,23 @@ export class GameScene extends Phaser.Scene {
       if (isValid) { return true }
     }
     return false
+  }
+
+  updatePlayers(player: Player): void {
+    this.pauseResumeSprites(player);
+    const btns = [this.p1Button, this.p2Button];
+    btns[player].turnMatches = true
+    btns[1 - player].turnMatches = false
+  }
+
+  updateOnAbilityPress(): void {
+    const lg = this.logicGame
+    const details = [lg.p1Details, lg.p2Details][lg.player]
+    const ballPos = this.logicGame.ballPos;
+    const validMoves = this.logicGame.getValidMoves(ballPos, details.character);
+    this.validMoves = validMoves;
+    // TODO: filter for new valid moves and show them with purple dot
+    this.setHighlightValidMoves(validMoves, true);
   }
 
   // ============ EVENTS ===========
@@ -155,6 +175,11 @@ export class GameScene extends Phaser.Scene {
       console.log("Game over, " + summary.winState.toString())
     }
     this.handleMoveEnd(ballPoint, queryPoint)
+  }
+
+  onButtonPress(): void {
+    this.abilityActive = true
+    this.updateOnAbilityPress()
   }
 
 
@@ -244,9 +269,7 @@ export class GameScene extends Phaser.Scene {
     const pos = [{ x: 120, y: 1100 }, { x: 650, y: 70 }];
     const details = [this.logicGame.p1Details, this.logicGame.p2Details];
     for (let i = 0; i < 2; i++) {
-
       const c = CHAR_NAMES[details[i].character as unknown as number]
-      console.log(c)
       const spr = new Phaser.GameObjects.Sprite(this, pos[i].x, pos[i].y, c);
       spr.setScale(SF + 1, SF + 1);
       spr.play({ key: c + '_passive', repeat: -1 });
@@ -279,7 +302,7 @@ export class GameScene extends Phaser.Scene {
       targets: this.ball,
       x: newGfxPos.x,
       y: newGfxPos.y,
-      duration: ballSpeed * delta,
+      duration: Math.floor(ballSpeed * delta),
       onComplete: this.moveEnded.bind(this)
     })
   }

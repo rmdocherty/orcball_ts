@@ -22,15 +22,10 @@ export class Ball extends Phaser.GameObjects.Sprite {
 
     move(oldPos: Point, newPos: Point): void {
         const gfxPos = toGfxPos(newPos);
-        //this.play({ key: 'vert', repeat: -1 });
-
         this.anims.resume()
         const dx = newPos.x - oldPos.x
         const dy = -1 * (newPos.y - oldPos.y)
-        console.log(dx, dy)
         this.adjustFromDelta(dx, dy)
-
-        //this.setPosition(gfxPos.x, gfxPos.y)
         this.gfxPos = gfxPos
     }
 

@@ -9,9 +9,16 @@
   <title>
     <%= htmlWebpackPlugin.options.title %>
   </title>
+  <style media='screen' type='text/css'>
+    @font-face {
+      font-family: "fibberish";
+      src: url('../assets/styles/fonts/fibberish.ttf');
+    }
+  </style>
 </head>
 
 <body>
+  <div style="font-family:'fibberish'; display: none;">TypeReg</div>
   <div id="game"></div>
 </body>
 
