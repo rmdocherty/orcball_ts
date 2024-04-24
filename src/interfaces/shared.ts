@@ -7,7 +7,7 @@ export const GAME_H = 667 * 2
 export const DOT_SPACING = 90 //96
 
 export const LINE_WIDTH = 4
-export const BANNER_H = 48
+export const BANNER_H = 36
 export const OFFSET: Point = {
     x: (GAME_W - (DEFAULT_W * DOT_SPACING) + 62),//94
     y: (GAME_H - (DEFAULT_H * DOT_SPACING) + 10) / 2 //14
@@ -81,8 +81,8 @@ export enum Colours {
     ORANGE = "#e65000",
     WHITE = "#ffffff",
     BROWN = "#7a450c",
-    P1_COL = "#fa442f",
-    P2_COL = "#0352fc",
+    P1_COL = "#ac3232",
+    P2_COL = "#5b6ee1",
 }
 
 export const valToCol = [

@@ -1,7 +1,7 @@
 import { Redhat } from '../objects/redhat';
 import { GraphicDot } from '../objects/pixel_dots';
 import { AbilityButton } from '../objects/button';
-import { Ball } from '../objects/ball';
+import { Ball } from '../objects/pixel_ball';
 import { LogicGame, } from '../logic/board';
 import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
@@ -54,6 +54,7 @@ export class GameScene extends Phaser.Scene {
     for (let name of DOT_NAMES) {
       this.load.aseprite(name, '../assets/tiles/' + name + '_dot.png', '../assets/tiles/' + name + '_dot.json')
     }
+    this.load.aseprite('ball', '../assets/tiles/ball.png', '../assets/tiles/ball.json')
   }
 
 
@@ -69,6 +70,7 @@ export class GameScene extends Phaser.Scene {
       const tag = this.anims.createFromAseprite(name);
       this.tags.push(tag)
     }
+    const tag = this.anims.createFromAseprite('ball');
 
     this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
     this.bgImage.setScale(SF, SF)
@@ -78,10 +80,10 @@ export class GameScene extends Phaser.Scene {
     // TODO: make walls semi translucent when mouse over the boudns/over dots on bounds
     this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2 + 30, 'walls')
     this.walls.setScale(SF, SF)
-    this.bgImage.setDepth(-100)
+    this.walls.setDepth(-99)
     this.add.existing(this.walls)
 
-    this.logicGame = new LogicGame(11, 9, Character.MAGE, Character.ORC);
+    this.logicGame = new LogicGame(11, 9, Character.RANGER, Character.ORC);
     this.gfxDots = this.initDots(this.logicGame);
 
     const ballPos = this.logicGame.ballPos
@@ -107,7 +109,9 @@ export class GameScene extends Phaser.Scene {
   handleMoveEnd(start: Point, end: Point): void {
     this.setHighlightValidMoves(this.validMoves, false);
     const ballPos = this.logicGame.ballPos;
-    this.ball.move(ballPos)
+    //this.ball.move(ballPos)
+    this.moveBall(start, ballPos)
+
     this.gfxDots[p_to_i(ballPos, this.logicGame.grid.w)].updateVal(Dot.FILLED)
 
     this.makePermanentLine(start, end)
@@ -181,30 +185,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   initLine(): Phaser.GameObjects.Line {
-    const lineColour = Phaser.Display.Color.GetColor32(245, 234, 240, 100);
+    //const lineColour = Phaser.Display.Color.GetColor32(245, 234, 240, 100);
+    const lineColour = Phaser.Display.Color.GetColor32(203, 219, 252, 255);
     const tmpLine = this.createLine(0, 0, 0, 0, lineColour, 2 * LINE_WIDTH, false)
     return tmpLine
-  }
-
-  initAnims(): void {
-    // TODO: only play anims of activte player
-    const pos = [{ x: 120, y: 1100 }, { x: 650, y: 70 }];
-    const details = [this.logicGame.p1Details, this.logicGame.p2Details];
-    for (let i = 0; i < 2; i++) {
-
-      const c = CHAR_NAMES[details[i].character as unknown as number]
-      console.log(c)
-      const spr = new Phaser.GameObjects.Sprite(this, pos[i].x, pos[i].y, c);
-      spr.setScale(SF + 1, SF + 1);
-      spr.play({ key: c + '_passive', repeat: -1 });
-      if (i == 0) {
-        this.p1Sprite = spr;
-      } else {
-        spr.setFlipX(true);
-        this.p2Sprite = spr;
-      }
-      this.add.existing(spr);
-    }
   }
 
   createLine(x0: number, y0: number, x1: number, y1: number, color: number, width: number, visible: boolean = false): Phaser.GameObjects.Line {
@@ -250,4 +234,47 @@ export class GameScene extends Phaser.Scene {
     this.add.existing(tmpLine)
   }
 
+  // ============ ANIMATIONS ============
+  initAnims(): void {
+    // TODO: only play anims of activte player
+    const pos = [{ x: 120, y: 1100 }, { x: 650, y: 70 }];
+    const details = [this.logicGame.p1Details, this.logicGame.p2Details];
+    for (let i = 0; i < 2; i++) {
+
+      const c = CHAR_NAMES[details[i].character as unknown as number]
+      console.log(c)
+      const spr = new Phaser.GameObjects.Sprite(this, pos[i].x, pos[i].y, c);
+      spr.setScale(SF + 1, SF + 1);
+      spr.play({ key: c + '_passive', repeat: -1 });
+      if (i == 0) {
+        this.p1Sprite = spr;
+      } else {
+        spr.setFlipX(true);
+        this.p2Sprite = spr;
+      }
+      this.add.existing(spr);
+    }
+  }
+
+  moveBall(oldPos: Point, newPos: Point): void {
+    const newGfxPos = toGfxPos(newPos)
+    this.ball.move(oldPos, newPos)
+    const ballSpeed = 160
+    const dx = newPos.x - oldPos.x
+    const dy = -1 * (newPos.y - oldPos.y)
+    const delta = Math.sqrt(dx * dx + dy * dy)
+
+    this.tweens.add({
+      targets: this.ball,
+      x: newGfxPos.x,
+      y: newGfxPos.y,
+      duration: ballSpeed * delta,
+      onComplete: this.moveEnded.bind(this)
+    })
+  }
+
+  moveEnded(): void {
+    this.ball.anims.pause()
+    this.ball.updatePos(this.logicGame.ballPos)
+  }
 }
