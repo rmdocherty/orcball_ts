@@ -1,4 +1,4 @@
-import { Redhat } from '../objects/redhat';
+
 import { GraphicDot } from '../objects/dots';
 import { AbilityButton } from '../objects/button';
 import { Ball } from '../objects/ball';
