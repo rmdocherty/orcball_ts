@@ -1,20 +1,44 @@
-import { GAME_H, GAME_W, SF } from '../interfaces/shared';
+import { wrap } from 'module';
+import { GAME_H, GAME_W, SF, CHAR_NAMES } from '../interfaces/shared';
 import { MenuButton, itemStyle } from '../objects/button';
 
 
-
+const characterBios = require('../assets/data.json')
 
 const OY = 160
 const YSPACE = 240
 const X_LHS = 140
 const X_RHS = 500
 
+interface Bio {
+    name: string,
+    desc: string,
+    tooltipName: string,
+    tooltip: string
+}
+
+export const bioNameStyle = {
+    fontFamily: 'fibberish',
+    fontSize: 48,
+}
+
+export const bioStyle = {
+    fontFamily: 'fibberish',
+    fontSize: 34,
+    wordWrap: { width: 350 }
+}
+
 export class MenuScene extends Phaser.Scene {
     bgImage: Phaser.GameObjects.Image
     title: Phaser.GameObjects.Text
     menuItems: Phaser.GameObjects.GameObject[] = []
     charSelectItems: Phaser.GameObjects.GameObject[] = [];
+    charSprites: Phaser.GameObjects.Sprite[] = []
+    selectedCharIdx: number = 0
+    currentBio: Bio = characterBios["warrior"]
+    bioItems: Phaser.GameObjects.Text[] = [];
 
+    // ============ INITS ===========
     constructor() {
         super({ key: 'MenuScene' });
     }
@@ -25,6 +49,9 @@ export class MenuScene extends Phaser.Scene {
         this.load.image('frame', '../assets/menus/char_frame.png')
         this.load.image('bio', '../assets/menus/bio_frame.png')
         this.load.image('tooltip', '../assets/buttons/tooltip_frame.png')
+        for (let sprite of CHAR_NAMES) {
+            this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
+        }
     }
 
     create(): void {
@@ -54,6 +81,8 @@ export class MenuScene extends Phaser.Scene {
             frame.setScale(SF, SF)
             this.charSelectItems.push(frame)
             frame.postFX.addShadow(0, 2, 0.015)
+            frame.setInteractive()
+            frame.on('pointerdown', this.onFrameClick.bind(this, i))
         }
         const bio = this.add.image(X_RHS, YSPACE + 40, 'bio')
         bio.setScale(SF, SF)
@@ -65,8 +94,18 @@ export class MenuScene extends Phaser.Scene {
             item.postFX.addShadow(0, 2, 0.015)
         }
 
+        const bioTitle = this.add.text(X_RHS - 180, YSPACE - 150, this.currentBio.name, bioNameStyle)
+        const bioText = this.add.text(X_RHS - 180, YSPACE - 90, this.currentBio.desc, bioStyle)
+
+        for (let item of [bioTitle, bioText]) {
+            this.charSelectItems.push(item)
+            item.postFX.addShadow(0, 2, 0.015)
+            this.bioItems.push(item)
+        }
         this.setCharSelect(false)
     }
+
+    // ============ WELCOME MENU ===========
 
     setMenuVis(vis: boolean) {
         for (let item of this.menuItems) {
@@ -91,6 +130,7 @@ export class MenuScene extends Phaser.Scene {
         console.log('local')
         this.setMenuVis(false)
         this.setCharSelect(true)
+        this.initAnims()
     }
 
     loadOnline() {
@@ -98,4 +138,39 @@ export class MenuScene extends Phaser.Scene {
         this.setMenuVis(false)
         this.setCharSelect(true)
     }
+
+    // ============ CHARACTER SELECT ===========
+    onFrameClick(i: number) {
+        const newBio: Bio = characterBios[CHAR_NAMES[i]]
+        const newText = [newBio.name, newBio.desc]
+        for (let i = 0; i < newText.length; i++) {
+            this.bioItems[i].setText(newText[i])
+        }
+        this.charSprites[this.selectedCharIdx].anims.pause();
+        this.charSprites[i].anims.resume();
+
+        this.selectedCharIdx = i
+        this.currentBio = newBio
+    }
+
+    initAnims(): void {
+        for (let name of CHAR_NAMES) {
+            const tag = this.anims.createFromAseprite(name);
+        }
+        for (let i = 0; i < 4; i++) {
+            const c = CHAR_NAMES[i]
+            const spr = new Phaser.GameObjects.Sprite(this, X_LHS - 10, 124 + i * YSPACE, c);
+            spr.setScale(SF, SF);
+            spr.play({ key: c + '_passive', repeat: -1 });
+            spr.anims.pause()
+            this.add.existing(spr);
+            spr.postFX.addShadow(0, 2, 0.008)
+            this.charSelectItems.push(spr)
+            this.charSprites.push(spr)
+        }
+        this.charSprites[0].anims.resume();
+    }
+
+
+
 }

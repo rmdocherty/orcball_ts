@@ -1,0 +1,19 @@
+{
+    "warrior": {
+        "name": "Efa, defender",
+        "desc": "Strong, serious - the best Sarf FC has had. This could be their season, assuming she can hit Messy with a good ol' reducer.",
+        "tooltip": ""
+    },
+    "orc": {
+        "name": "Messy, winger",
+        "desc": "Nimble, gifted - three time winner of the Ballon d'Orc. Confused as to why the others have swords, and is starting to worry they don't know the rules."
+    },
+    "mage": {
+        "name": "Kettle, midfielder",
+        "desc": "One of the greatest tactical minds the game has seen. They're also the inventor of astral-assisted replay, which has failed to win them any fans. "
+    },
+    "ranger": {
+        "name": "Canterwell, striker",
+        "desc": "Almost as fast as he is vain, he is followed as much for his goals as his luscious blond locks. Never fails to give an interview, even if not invited."
+    }
+}

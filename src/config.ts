@@ -24,5 +24,5 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
     }
   },
   antialias: false,
-  scene: [GameScene] // entrypoint
+  scene: [MenuScene] // entrypoint
 };
