@@ -75,7 +75,7 @@ export class GameScene extends Phaser.Scene {
 
     this.initBG()
 
-    this.logicGame = new LogicGame(11, 9, Character.RANGER, Character.ORC);
+    this.logicGame = new LogicGame(11, 9, Character.RANGER, Character.MAGE);
     this.gfxDots = this.initDots(this.logicGame);
 
     const ballPos = this.logicGame.ballPos
@@ -101,18 +101,25 @@ export class GameScene extends Phaser.Scene {
 
   // ============ GAME LOGIC ===========
   handleMoveEnd(start: Point, end: Point): void {
+    this.hideTempLine()
+    this.abilityActive = false
     this.setHighlightValidMoves(this.validMoves, false);
     const ballPos = this.logicGame.ballPos;
-    //this.ball.move(ballPos)
+
     this.moveBall(start, ballPos)
 
     this.gfxDots[p_to_i(ballPos, this.logicGame.grid.w)].updateVal(Dot.FILLED)
 
-    this.makePermanentLine(start, end)
+    const [dx, dy] = [end.x - start.x, end.y - start.y]
+    const delta = Math.sqrt(dx * dx + dy * dy)
+    if (delta < Math.sqrt(3)) { // only draw 1 links
+      this.makePermanentLine(start, end)
+    }
 
     const validMoves = this.logicGame.getValidMoves(ballPos, Character.NONE);
     this.validMoves = validMoves;
     this.setHighlightValidMoves(validMoves, true);
+
     this.updatePlayers(this.logicGame.player);
   }
 
@@ -129,6 +136,12 @@ export class GameScene extends Phaser.Scene {
     const btns = [this.p1Button, this.p2Button];
     btns[player].turnMatches = true
     btns[1 - player].turnMatches = false
+
+    const lg = this.logicGame
+    const details = [lg.p1Details, lg.p2Details]
+    for (let i = 0; i < 2; i++) {
+      btns[i].setAvailable(details[i].movesBeforeCooldown)
+    }
   }
 
   updateOnAbilityPress(): void {
@@ -163,7 +176,13 @@ export class GameScene extends Phaser.Scene {
     if (!this.checkPointValid(queryPoint)) {
       return
     }
-    const summary = this.logicGame.makeMove(ballPoint, queryPoint, Character.NONE)
+
+    // if ability has been clicked, use that player's character to make logic move
+    const lg = this.logicGame
+    const details = [lg.p1Details, lg.p2Details][lg.player]
+    const char = (this.abilityActive) ? details.character : Character.NONE
+
+    const summary = this.logicGame.makeMove(ballPoint, queryPoint, char)
     if (summary.moveOver == true) {
       const newPlayer = this.logicGame.player
       const newColourHex = (newPlayer == Player.P1) ? Colours.P1_COL : Colours.P2_COL

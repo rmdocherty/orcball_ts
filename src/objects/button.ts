@@ -1,6 +1,16 @@
 import { Character, PlayerDetails, SF } from "../interfaces/shared";
 
 
+const cooldownTextStyle = {
+    fontFamily: 'fibberish', fontSize: 80, shadow: {
+        color: '#000000',
+        fill: true,
+        offsetX: 2,
+        offsetY: 2,
+        blur: 20
+    }
+}
+
 export class AbilityButton extends Phaser.GameObjects.Container {
     private button: Phaser.GameObjects.Image
     private abilityIcon: Phaser.GameObjects.Image
@@ -16,15 +26,9 @@ export class AbilityButton extends Phaser.GameObjects.Container {
         const abilityString = ["warrior", "orc", "mage", "ranger"][playerDetails.character];
         this.button = new Phaser.GameObjects.Image(scene, x, y, playerString + "_button");
         this.abilityIcon = new Phaser.GameObjects.Image(scene, x, y, abilityString + "_ability");
-        this.cooldownText = new Phaser.GameObjects.Text(scene, x, y, '5', {
-            fontFamily: 'fibberish', fontSize: 50, shadow: {
-                color: '#000000',
-                fill: true,
-                offsetX: 2,
-                offsetY: 2,
-                blur: 20
-            }
-        })
+        this.cooldownText = new Phaser.GameObjects.Text(scene, x + 35, y + 10, '5', cooldownTextStyle)
+
+        this.cooldownText.visible = false;
 
         this.setScales(SF);
         this.initInputs();
@@ -55,7 +59,7 @@ export class AbilityButton extends Phaser.GameObjects.Container {
     }
 
     private onPointerOver(): void {
-        if (this.turnMatches) { this.setScales(1.05 * SF) };
+        if (this.turnMatches && this.available) { this.setScales(1.05 * SF) };
     }
 
     private onPointerOut(): void {
@@ -68,13 +72,18 @@ export class AbilityButton extends Phaser.GameObjects.Container {
         };
     }
 
-    public setAvailable(available: boolean) {
-        this.available = available;
-        if (available == true) {
+    public setAvailable(turnsLeft: number) {
+        console.log(turnsLeft)
+        if (turnsLeft <= 0) {
+            this.available = true
             this.button.clearTint();
             this.abilityIcon.clearTint();
+            this.cooldownText.visible = false
         } else {
+            this.available = false
             this.setTints(0X696a6a);
+            this.cooldownText.setText(turnsLeft.toString())
+            this.cooldownText.visible = true
         }
     }
 }

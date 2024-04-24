@@ -296,7 +296,7 @@ export const init = (): void => {
 }
 
 const getPlayerDetails = (character: Character, player: Player): PlayerDetails => {
-    const cooldowns = [5, 5, 5, 5]
+    const cooldowns = [6, 7, 5, 5]
     return { player: player, character: character, cooldownLength: cooldowns[character], movesBeforeCooldown: 0 }
 }
 
@@ -374,9 +374,12 @@ export class LogicGame {
 
         const startIdx = p_to_i(start, w);
         const endIdx = p_to_i(end, w);
-
-        this.adjMat[startIdx][endIdx] = Link.FILLED;
-        this.adjMat[endIdx][startIdx] = Link.FILLED;
+        const [dx, dy] = [end.x - start.x, end.y - start.y]
+        const delta = Math.sqrt(dx * dx + dy * dy)
+        const link = (delta > Math.sqrt(3)) ? Link.INVALID : Link.FILLED
+        // only fill dist 1 links
+        this.adjMat[startIdx][endIdx] = link;
+        this.adjMat[endIdx][startIdx] = link;
 
         const newDotVal = this.grid.get(end.x, end.y);
         // orc ability here
