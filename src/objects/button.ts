@@ -87,3 +87,48 @@ export class AbilityButton extends Phaser.GameObjects.Container {
         }
     }
 }
+
+export const itemStyle = {
+    fontFamily: 'fibberish',
+    fontSize: 80,
+
+    shadow: {
+        color: '#000000',
+        fill: true,
+        offsetX: 2,
+        offsetY: 2,
+        stroke: true,
+        blur: 20,
+    },
+}
+
+export class MenuButton extends Phaser.GameObjects.Text {
+    constructor(scene: Phaser.Scene, x: number, y: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle) {
+        super(scene, x, y, text, style)
+        this.setOrigin(0.5, 0.5)
+        this.scene.add.existing(this)
+        this.initInputs()
+    }
+
+    private initInputs(): void {
+        this.setInteractive();
+        const fns = [this.onPointerOver, this.onPointerOut];
+        const events = ["pointerover", "pointerout",];
+        for (let i = 0; i < fns.length; i++) {
+            // bind otherwise 'this' in fn refers to inner dot
+            this.on(events[i], fns[i].bind(this));
+        }
+    }
+
+    private onPointerOver(): void {
+        this.setScale(1.1, 1.1)
+        //this.setTint()
+    }
+
+    private onPointerOut(): void {
+        this.setScale(1, 1)
+        this.clearTint()
+    }
+
+
+}

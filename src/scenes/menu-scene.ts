@@ -1,19 +1,8 @@
 import { GAME_H, GAME_W, SF } from '../interfaces/shared';
+import { MenuButton, itemStyle } from '../objects/button';
 
 
-const itemStyle = {
-    fontFamily: 'fibberish',
-    fontSize: 80,
 
-    shadow: {
-        color: '#000000',
-        fill: true,
-        offsetX: 2,
-        offsetY: 2,
-        stroke: true,
-        blur: 20,
-    },
-}
 
 const OY = 160
 const YSPACE = 240
@@ -23,6 +12,7 @@ const X_RHS = 500
 export class MenuScene extends Phaser.Scene {
     bgImage: Phaser.GameObjects.Image
     title: Phaser.GameObjects.Text
+    menuItems: Phaser.GameObjects.GameObject[] = []
     charSelectItems: Phaser.GameObjects.GameObject[] = [];
 
     constructor() {
@@ -45,15 +35,17 @@ export class MenuScene extends Phaser.Scene {
 
         const title = this.add.image(375, 350, 'title')
         title.setScale(SF + 1, SF + 1)
+        title.postFX.addShadow(0, 2, 0.02)
+        this.menuItems.push(title)
 
         const names = ["tutorial", "local", "online"]
+        const fns = [this.loadTutorial, this.loadLocal, this.loadOnline]
         for (let i = 0; i < names.length; i++) {
-            const text = this.add.text(GAME_W / 2, 550 + 150 * i, names[i], itemStyle)
-            text.setOrigin(0.5, 0.5)
+            const text = new MenuButton(this, GAME_W / 2, 550 + 150 * i, names[i], itemStyle)
+            text.on('pointerdown', fns[i].bind(this))
+            this.menuItems.push(text)
         }
-
         this.createCharSelect()
-
     }
 
     createCharSelect(): void {
@@ -61,6 +53,7 @@ export class MenuScene extends Phaser.Scene {
             const frame = this.add.image(X_LHS, OY + YSPACE * i, 'frame')
             frame.setScale(SF, SF)
             this.charSelectItems.push(frame)
+            frame.postFX.addShadow(0, 2, 0.015)
         }
         const bio = this.add.image(X_RHS, YSPACE + 40, 'bio')
         bio.setScale(SF, SF)
@@ -69,11 +62,40 @@ export class MenuScene extends Phaser.Scene {
 
         for (let item of [bio, tooltip]) {
             this.charSelectItems.push(item)
+            item.postFX.addShadow(0, 2, 0.015)
         }
 
+        this.setCharSelect(false)
+    }
+
+    setMenuVis(vis: boolean) {
+        for (let item of this.menuItems) {
+            // @ts-ignore
+            item.setVisible(vis)
+        }
+    }
+
+    setCharSelect(vis: boolean) {
         for (let item of this.charSelectItems) {
             // @ts-ignore
-            item.setVisible(false)
+            item.setVisible(vis)
         }
+    }
+
+    loadTutorial() {
+        console.log('tutorial')
+        this.setMenuVis(false)
+    }
+
+    loadLocal() {
+        console.log('local')
+        this.setMenuVis(false)
+        this.setCharSelect(true)
+    }
+
+    loadOnline() {
+        console.log('online')
+        this.setMenuVis(false)
+        this.setCharSelect(true)
     }
 }
