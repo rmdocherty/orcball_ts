@@ -215,6 +215,7 @@ export class GameScene extends Phaser.Scene {
     this.walls.setScale(SF, SF)
     this.walls.setDepth(-99)
     this.add.existing(this.walls)
+    this.walls.postFX.addShadow(0, 2, 0.01)
   }
 
   initDots(game: LogicGame): GraphicDot[] {
@@ -299,6 +300,7 @@ export class GameScene extends Phaser.Scene {
         this.p2Sprite = spr;
       }
       this.add.existing(spr);
+      spr.postFX.addShadow(0, 2, 0.01)
     }
     this.p2Sprite.anims.pause()
   }
