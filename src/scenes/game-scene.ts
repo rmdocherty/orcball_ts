@@ -119,6 +119,7 @@ export class GameScene extends Phaser.Scene {
     const validMoves = this.logicGame.getValidMoves(ballPos, Character.NONE);
     this.validMoves = validMoves;
     this.setHighlightValidMoves(validMoves, true);
+    this.pauseResumeSprites(this.logicGame.player);
   }
 
   checkPointValid(queryPoint: Point): boolean {
@@ -254,6 +255,13 @@ export class GameScene extends Phaser.Scene {
       }
       this.add.existing(spr);
     }
+    this.p2Sprite.anims.pause()
+  }
+
+  pauseResumeSprites(player: Player): void {
+    const sprs = [this.p1Sprite, this.p2Sprite];
+    sprs[player].anims.resume()
+    sprs[1 - player].anims.pause()
   }
 
   moveBall(oldPos: Point, newPos: Point): void {
