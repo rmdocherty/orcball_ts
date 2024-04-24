@@ -1,15 +1,16 @@
 import { Redhat } from '../objects/redhat';
-import { GraphicDot } from '../objects/pixel_dots';
+import { GraphicDot } from '../objects/dots';
 import { AbilityButton } from '../objects/button';
-import { Ball } from '../objects/pixel_ball';
+import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
 import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
 
 
+const FUDGE_PX = 3
 const centerPoint = (p: Point): Point => {
-  return { x: p.x + DOT_SIZE + LINE_WIDTH, y: p.y + DOT_SIZE + LINE_WIDTH }
+  return { x: p.x + DOT_SIZE + LINE_WIDTH + FUDGE_PX, y: p.y + DOT_SIZE + LINE_WIDTH + FUDGE_PX }
 }
 
 
@@ -58,7 +59,6 @@ export class GameScene extends Phaser.Scene {
   }
 
 
-  // TODO: shrink sides of map by 1 tile
 
   create(): void {
 
@@ -72,16 +72,7 @@ export class GameScene extends Phaser.Scene {
     }
     const tag = this.anims.createFromAseprite('ball');
 
-    this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
-    this.bgImage.setScale(SF, SF)
-    this.bgImage.setDepth(-100)
-    this.add.existing(this.bgImage)
-
-    // TODO: make walls semi translucent when mouse over the boudns/over dots on bounds
-    this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2 + 30, 'walls')
-    this.walls.setScale(SF, SF)
-    this.walls.setDepth(-99)
-    this.add.existing(this.walls)
+    this.initBG()
 
     this.logicGame = new LogicGame(11, 9, Character.RANGER, Character.ORC);
     this.gfxDots = this.initDots(this.logicGame);
@@ -169,6 +160,18 @@ export class GameScene extends Phaser.Scene {
 
 
   // ============ GRAPHICS ============
+  initBG(): void {
+    this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
+    this.bgImage.setScale(SF, SF)
+    this.bgImage.setDepth(-100)
+    this.add.existing(this.bgImage)
+
+    // TODO: make walls semi translucent when mouse over the boudns/over dots on bounds
+    this.walls = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2 + 30, 'walls')
+    this.walls.setScale(SF, SF)
+    this.walls.setDepth(-99)
+    this.add.existing(this.walls)
+  }
 
   initDots(game: LogicGame): GraphicDot[] {
     const dots: GraphicDot[] = [];
