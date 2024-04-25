@@ -33,6 +33,7 @@ export class MenuScene extends Phaser.Scene {
     title: Phaser.GameObjects.Text
     menuItems: Phaser.GameObjects.GameObject[] = []
     charSelectItems: Phaser.GameObjects.GameObject[] = [];
+    frames: Phaser.GameObjects.Image[] = [];
     charSprites: Phaser.GameObjects.Sprite[] = []
     selectedCharIdx: number = 0
     currentBio: Bio = characterBios["warrior"]
@@ -82,7 +83,10 @@ export class MenuScene extends Phaser.Scene {
             this.charSelectItems.push(frame)
             frame.postFX.addShadow(0, 2, 0.015)
             frame.setInteractive()
+            this.frames.push(frame)
             frame.on('pointerdown', this.onFrameClick.bind(this, i))
+            frame.on('pointerover', this.onFrameHover.bind(this, i))
+            frame.on('pointerout', this.onFrameOut.bind(this, i))
         }
         const bio = this.add.image(X_RHS, YSPACE + 40, 'bio')
         bio.setScale(SF, SF)
@@ -151,6 +155,14 @@ export class MenuScene extends Phaser.Scene {
 
         this.selectedCharIdx = i
         this.currentBio = newBio
+    }
+
+    onFrameHover(i: number) {
+        this.frames[i].setScale(SF * 1.05, SF * 1.05)
+    }
+
+    onFrameOut(i: number) {
+        this.frames[i].setScale(SF, SF)
     }
 
     initAnims(): void {
