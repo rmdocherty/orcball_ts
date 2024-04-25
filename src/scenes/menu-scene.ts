@@ -1,6 +1,7 @@
 import { wrap } from 'module';
 import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared';
-import { MenuButton, itemStyle } from '../objects/button';
+import { MenuButton, itemStyle, } from '../objects/button';
+import { Tutorial } from '../objects/tutorial';
 
 
 let characterBios = require('../assets/data.json')
@@ -49,6 +50,8 @@ export class MenuScene extends Phaser.Scene {
 
     frames: Phaser.GameObjects.Image[] = [];
     charSprites: Phaser.GameObjects.Sprite[]
+
+    tutorial: Tutorial;
 
     currentBio: Bio = characterBios["warrior"]
     selectedCharIdx: number
@@ -100,6 +103,7 @@ export class MenuScene extends Phaser.Scene {
             const name = 't' + i.toString()
             this.load.image(name, '../assets/menus/' + name + '.png')
         }
+        this.load.image('arrow', '../assets/buttons/page_fwd.png')
 
         this.preloadAudio()
     }
@@ -133,6 +137,11 @@ export class MenuScene extends Phaser.Scene {
             this.menuItems.push(text)
         }
         this.createCharSelect()
+
+        this.tutorial = new Tutorial(this)
+        this.tutorial.visible = false
+        this.tutorial.gotoMenu.on('pointerdown', this.hideTutorial.bind(this))
+        this.add.existing(this.tutorial)
     }
 
     createCharSelect(): void {
@@ -207,11 +216,12 @@ export class MenuScene extends Phaser.Scene {
     loadTutorial() {
         console.log('tutorial')
         this.setMenuVis(false)
+        this.tutorial.visible = true
+    }
 
-        const tutorialFrame = this.add.image(GAME_W / 2, GAME_H / 2, 'tutorial_frame')
-        tutorialFrame.setScale(SF, SF)
-        tutorialFrame.postFX.addShadow(0, 2, 0.015)
-
+    hideTutorial() {
+        this.setMenuVis(true)
+        this.tutorial.visible = false
     }
 
     loadLocal() {
