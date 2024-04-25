@@ -26,7 +26,7 @@ export class GameScene extends Phaser.Scene {
   private bgImage: Phaser.GameObjects.Image;
   private walls: Phaser.GameObjects.Image;
 
-  private playerBanner: Phaser.GameObjects.Rectangle;
+  private playerBanner: Phaser.GameObjects.Image;
   private quitButton: Phaser.GameObjects.Text;
   private restartButton: Phaser.GameObjects.Text;
 
@@ -230,7 +230,9 @@ export class GameScene extends Phaser.Scene {
       const newPlayer = this.logicGame.player
       const newColourHex = (newPlayer == Player.P1) ? Colours.P1_COL : Colours.P2_COL
       const newColour = colourEnumToPhaserColor(newColourHex)
-      this.playerBanner.fillColor = newColour
+      const bannerName = ['banner_1', 'banner_2']
+      this.playerBanner.setTexture(bannerName[newPlayer])
+      //this.playerBanner.fillColor = newColour
     }
 
     this.winState = summary.winState
@@ -283,7 +285,9 @@ export class GameScene extends Phaser.Scene {
 
   initBanner(): void {
     const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
-    this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
+    this.playerBanner = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H - BANNER_H, 'banner_1') //new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
+    this.playerBanner.setScale(SF, SF)
+
     this.add.existing(this.playerBanner)
 
     const newStyle = {
@@ -297,7 +301,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    const y = GAME_H - BANNER_H - 5
+    const y = GAME_H - BANNER_H
     const quit = new MenuButton(this, GAME_W - 100, y, 'Quit', newStyle)
     const restart = new MenuButton(this, GAME_W - 250, y, 'Restart', newStyle)
     const mute = new MenuButton(this, 100, y, 'Mute', newStyle)

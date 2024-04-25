@@ -75,7 +75,6 @@ export class MenuScene extends Phaser.Scene {
             this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
         }
 
-        this.load.image('bg', '../assets/tiles/bg.png')
         this.load.image('walls', '../assets/tiles/walls.png')
         for (let btn of ["p1_button", "p2_button"]) {
             this.load.image(btn, '../assets/buttons/' + btn + '.png')
@@ -92,6 +91,9 @@ export class MenuScene extends Phaser.Scene {
         }
         this.load.aseprite('ball', '../assets/tiles/ball.png', '../assets/tiles/ball.json')
         this.load.image('win_popup', '../assets/menus/bio_frame.png')
+
+        this.load.image('banner_1', '../assets/menus/banner_1.png')
+        this.load.image('banner_2', '../assets/menus/banner_2.png')
 
         this.preloadAudio()
     }
