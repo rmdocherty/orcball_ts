@@ -9,7 +9,7 @@
         "name": "Messy, winger",
         "desc": "Nimble, gifted - three time winner of the Ballon d'Orc. Confused as to why the others have swords, and is starting to worry they don't know the rules.",
         "tooltipName": "'Tekkers'",
-        "tooltip": "Can move again if moving to empty dot"
+        "tooltip": "Can move again if moving to empty space"
     },
     "mage": {
         "name": "Kettle, midfielder",
@@ -21,6 +21,6 @@
         "name": "Canterwell, striker",
         "desc": "Almost as fast as he is vain, he is followed as much for his goals as his luscious blond locks. Never fails to give an interview, even if not invited.",
         "tooltipName": "'Pace Merchant'",
-        "tooltip": "Can hop two dots away diagonally"
+        "tooltip": "Can hop two spaces away diagonally"
     }
 }

@@ -36,8 +36,10 @@ export class MenuScene extends Phaser.Scene {
     frames: Phaser.GameObjects.Image[] = [];
     charSprites: Phaser.GameObjects.Sprite[] = []
     selectedCharIdx: number = 0
+    selectedChars: number[] = [];
     currentBio: Bio = characterBios["warrior"]
     bioItems: Phaser.GameObjects.Text[] = [];
+    confirmButton: Phaser.GameObjects.Image;
 
     // ============ INITS ===========
     constructor() {
@@ -50,6 +52,7 @@ export class MenuScene extends Phaser.Scene {
         this.load.image('frame', '../assets/menus/char_frame.png')
         this.load.image('bio', '../assets/menus/bio_frame.png')
         this.load.image('tooltip', '../assets/buttons/tooltip_frame.png')
+        this.load.image('confirm', '../assets/buttons/confirm_button.png')
         for (let sprite of CHAR_NAMES) {
             this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
         }
@@ -89,14 +92,21 @@ export class MenuScene extends Phaser.Scene {
             frame.on('pointerout', this.onFrameOut.bind(this, i))
         }
         const bio = this.add.image(X_RHS, YSPACE + 40, 'bio')
-        bio.setScale(SF, SF)
         const tooltip = this.add.image(X_RHS, OY + YSPACE * 2, 'tooltip')
-        tooltip.setScale(SF, SF)
+        const confirmButton = this.add.image(X_RHS + X_LHS, YSPACE * 3.5, 'confirm')
 
-        for (let item of [bio, tooltip]) {
+        for (let item of [bio, tooltip, confirmButton]) {
             this.charSelectItems.push(item)
+            item.setScale(SF, SF)
             item.postFX.addShadow(0, 2, 0.015)
         }
+
+        confirmButton.setInteractive()
+        confirmButton.on('pointerdown', this.onConfirmDown.bind(this))
+        confirmButton.on('pointerover', this.onConfirmHover.bind(this))
+        confirmButton.on('pointerout', this.onConfirmOut.bind(this))
+
+        this.confirmButton = confirmButton
 
         const bioTitle = this.add.text(X_RHS - 180, YSPACE - 150, this.currentBio.name, bioNameStyle)
         const bioText = this.add.text(X_RHS - 180, YSPACE - 90, this.currentBio.desc, bioStyle)
@@ -108,6 +118,7 @@ export class MenuScene extends Phaser.Scene {
             item.postFX.addShadow(0, 2, 0.015)
             this.bioItems.push(item)
         }
+
         this.setCharSelect(false)
     }
 
@@ -165,6 +176,22 @@ export class MenuScene extends Phaser.Scene {
 
     onFrameOut(i: number) {
         this.frames[i].setScale(SF, SF)
+    }
+
+    onConfirmHover() {
+        this.confirmButton.setScale(SF * 1.05, SF * 1.05)
+    }
+
+    onConfirmOut() {
+        this.confirmButton.setScale(SF, SF)
+    }
+
+    onConfirmDown() {
+        this.selectedChars.push(this.selectedCharIdx)
+        this.confirmButton.setScale(SF, SF)
+        if (this.selectedChars.length == 2) {
+            this.scene.start('GameScene', { p1: this.selectedChars[0], p2: this.selectedChars[1] })
+        }
     }
 
     initAnims(): void {

@@ -111,6 +111,12 @@ export interface ImageConstructor {
     frame?: string | number;
 }
 
+export interface GameStart {
+    p1: Character,
+    p2: Character
+}
+
+
 export const i_to_p = (i: number, nx: number): Point => {
     return { x: i % nx, y: Math.floor(i / nx) };
 }

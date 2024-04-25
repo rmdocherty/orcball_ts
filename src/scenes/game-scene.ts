@@ -3,9 +3,10 @@ import { GraphicDot } from '../objects/dots';
 import { AbilityButton } from '../objects/button';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared';
+import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES, GameStart } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
+import { Data } from 'phaser';
 
 
 const FUDGE_PX = 3
@@ -38,6 +39,10 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'GameScene' });
+  }
+
+  init(data: GameStart) {
+    this.logicGame = new LogicGame(11, 9, data.p1, data.p2);
   }
 
   preload(): void { // load my assets in here later
@@ -75,7 +80,7 @@ export class GameScene extends Phaser.Scene {
 
     this.initBG()
 
-    this.logicGame = new LogicGame(11, 9, Character.WARRIOR, Character.ORC);
+
     this.gfxDots = this.initDots(this.logicGame);
 
     const ballPos = this.logicGame.ballPos
