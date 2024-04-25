@@ -71,7 +71,9 @@ export class AbilityButton extends Phaser.GameObjects.Container {
     private onPointerDown(): void {
         if (this.available && this.turnMatches) {
             this.emit('ability_clicked', this);
-        };
+        } else {
+            this.scene.sound.play('invalid')
+        }
     }
 
     public setAvailable(turnsLeft: number) {

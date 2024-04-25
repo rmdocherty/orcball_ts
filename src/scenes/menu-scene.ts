@@ -74,7 +74,16 @@ export class MenuScene extends Phaser.Scene {
         for (let sprite of CHAR_NAMES) {
             this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
         }
+
+        this.preloadAudio()
+    }
+
+    preloadAudio(): void {
         this.load.audio('main_music', '../assets/music/embark.ogg')
+        const fnames = ["ability_used", "accept", "invalid", "kick1", "kick2", "kick3", "mage_ability", "orc_ability", "ranger_ability", "warrior_ability", "win"]
+        for (let fname of fnames) {
+            this.load.audio(fname, '../assets/music/' + fname + ".wav")
+        }
     }
 
     create(): void {
@@ -176,6 +185,7 @@ export class MenuScene extends Phaser.Scene {
 
     loadLocal() {
         console.log('local')
+        this.sound.play('accept')
         this.setMenuVis(false)
         this.setCharSelect(true)
         this.initAnims()
@@ -227,6 +237,7 @@ export class MenuScene extends Phaser.Scene {
         const bioName: string = characterBios[CHAR_NAMES[i]].name
         const name = bioName.split(",")[0]
         this.playerSelectTexts[0].setText('P1: ' + name)
+        this.sound.play('accept')
     }
 
     initAnims(): void {

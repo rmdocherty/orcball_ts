@@ -115,7 +115,7 @@ export class GameScene extends Phaser.Scene {
     this.handleMoveEnd(ballPos, ballPos);
 
     this.music = this.sound.add('main_music')
-    this.music.play()
+    this.music.play({ volume: 0.45, delay: 0.6 })
 
   }
 
@@ -172,6 +172,9 @@ export class GameScene extends Phaser.Scene {
     this.validMoves = validMoves;
     // TODO: filter for new valid moves and show them with purple dot
     this.setHighlightValidMoves(validMoves, true);
+
+    const soundName = CHAR_NAMES[details.character] + "_ability";
+    this.sound.play(soundName, { volume: 1.5 })
   }
 
   quit(): void {
@@ -180,6 +183,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   restart(): void {
+    this.music.stop()
     const p1Details = this.logicGame.p1Details
     const p2Details = this.logicGame.p2Details
     this.scene.start('GameScene', { p1: p1Details.character, p2: p2Details.character })
@@ -208,6 +212,7 @@ export class GameScene extends Phaser.Scene {
     this.quitButton.setPosition(X_LHS + 230, GAME_H / 2 - 30)
     this.quitButton.setDepth(100)
     popup.setScale(SF, SF)
+    this.sound.play('win')
   }
 
   // ============ EVENTS ===========
@@ -409,6 +414,9 @@ export class GameScene extends Phaser.Scene {
       duration: Math.floor(ballSpeed * delta),
       onComplete: this.moveEnded.bind(this)
     })
+
+    const ballSoundIdx = Math.floor(Math.random() * 3) + 1
+    this.sound.play('kick' + ballSoundIdx.toString(), { volume: 1.1 })
   }
 
   moveEnded(): void {
@@ -420,4 +428,6 @@ export class GameScene extends Phaser.Scene {
       this.onWin()
     }
   }
+
+
 }
