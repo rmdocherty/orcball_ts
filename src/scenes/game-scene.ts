@@ -43,6 +43,7 @@ export class GameScene extends Phaser.Scene {
   private winState: WinState
 
   private muted: boolean
+  private music: Phaser.Sound.BaseSound
 
   constructor() {
     super({ key: 'GameScene' });
@@ -70,6 +71,8 @@ export class GameScene extends Phaser.Scene {
     }
     this.load.aseprite('ball', '../assets/tiles/ball.png', '../assets/tiles/ball.json')
     this.load.image('win_popup', '../assets/menus/bio_frame.png')
+
+
   }
 
 
@@ -110,6 +113,9 @@ export class GameScene extends Phaser.Scene {
 
     this.initAnims();
     this.handleMoveEnd(ballPos, ballPos);
+
+    this.music = this.sound.add('main_music')
+    this.music.play()
 
   }
 
@@ -169,6 +175,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   quit(): void {
+    this.music.stop()
     this.scene.start('MenuScene')
   }
 
@@ -181,14 +188,17 @@ export class GameScene extends Phaser.Scene {
   mute(text: Phaser.GameObjects.Text): void {
     if (this.muted) {
       text.setText('Mute')
+      this.music.resume()
     } else {
+      this.music.pause()
       text.setText('Unumute')
     }
     this.muted = !this.muted
   }
 
   onWin(): void {
-    const rect = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x4f4d46, 20)
+    // was 0x4f4d46
+    const rect = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x8b9150, 10)
     const popup = this.add.image(GAME_W / 2, GAME_H / 2 - 100, 'win_popup')
     const text = this.add.text(X_LHS + 100, GAME_H / 2 - 280, 'P' + this.winState.toString() + ' Wins!', itemStyle)
 

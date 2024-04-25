@@ -74,6 +74,7 @@ export class MenuScene extends Phaser.Scene {
         for (let sprite of CHAR_NAMES) {
             this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
         }
+        this.load.audio('main_music', '../assets/music/embark.ogg')
     }
 
     create(): void {
