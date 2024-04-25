@@ -95,6 +95,12 @@ export class MenuScene extends Phaser.Scene {
         this.load.image('banner_1', '../assets/menus/banner_1.png')
         this.load.image('banner_2', '../assets/menus/banner_2.png')
 
+        this.load.image('tutorial_frame', '../assets/menus/tutorial_frame.png')
+        for (let i = 1; i < 7; i++) {
+            const name = 't' + i.toString()
+            this.load.image(name, '../assets/menus/' + name + '.png')
+        }
+
         this.preloadAudio()
     }
 
@@ -201,6 +207,11 @@ export class MenuScene extends Phaser.Scene {
     loadTutorial() {
         console.log('tutorial')
         this.setMenuVis(false)
+
+        const tutorialFrame = this.add.image(GAME_W / 2, GAME_H / 2, 'tutorial_frame')
+        tutorialFrame.setScale(SF, SF)
+        tutorialFrame.postFX.addShadow(0, 2, 0.015)
+
     }
 
     loadLocal() {
@@ -215,6 +226,7 @@ export class MenuScene extends Phaser.Scene {
         console.log('online')
         this.setMenuVis(false)
         this.setCharSelect(true)
+        this.initAnims()
     }
 
     // ============ CHARACTER SELECT ===========
