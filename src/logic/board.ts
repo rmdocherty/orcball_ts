@@ -232,7 +232,7 @@ const getMageValidMoves = (oldAdjVec: number[], grid: Grid, start: Point, startV
 
 const getRangerValidMoves = (oldAdjVec: number[], grid: Grid, start: Point, startVal: Dot) => {
     const addedNeighbourhood = rangerAddMoore(start);
-    const rangerAdjFn = (startVal == Dot.EMPTY) ? getEmptyDotAdjVec : getWallDotAdjVec;
+    const rangerAdjFn = (startVal != Dot.WALL) ? getEmptyDotAdjVec : getWallDotAdjVec;
     const newAdjVec = rangerAdjFn(start, grid, addedNeighbourhood);
     const newAdjVecArr = Array.from(newAdjVec);
     const combinedAdjVecArr = newAdjVecArr.map((v, idx) => ((oldAdjVec[idx] != Link.FILLED) ? v : 2))

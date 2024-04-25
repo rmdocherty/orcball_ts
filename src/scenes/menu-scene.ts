@@ -3,7 +3,7 @@ import { GAME_H, GAME_W, SF, CHAR_NAMES } from '../interfaces/shared';
 import { MenuButton, itemStyle } from '../objects/button';
 
 
-const characterBios = require('../assets/data.json')
+let characterBios = require('../assets/data.json')
 
 const OY = 160
 const YSPACE = 240
@@ -28,17 +28,34 @@ export const bioStyle = {
     wordWrap: { width: 350 }
 }
 
+export const p1Style: Phaser.Types.GameObjects.Text.TextStyle = {
+    fontFamily: 'fibberish',
+    fontSize: 72,
+    color: "#ac3232",
+}
+
+export const p2Style: Phaser.Types.GameObjects.Text.TextStyle = {
+    fontFamily: 'fibberish',
+    fontSize: 72,
+    color: "#5b6ee1",
+}
+
 export class MenuScene extends Phaser.Scene {
     bgImage: Phaser.GameObjects.Image
     title: Phaser.GameObjects.Text
     menuItems: Phaser.GameObjects.GameObject[] = []
     charSelectItems: Phaser.GameObjects.GameObject[] = [];
+
     frames: Phaser.GameObjects.Image[] = [];
-    charSprites: Phaser.GameObjects.Sprite[] = []
-    selectedCharIdx: number = 0
-    selectedChars: number[] = [];
+    charSprites: Phaser.GameObjects.Sprite[]
+
     currentBio: Bio = characterBios["warrior"]
-    bioItems: Phaser.GameObjects.Text[] = [];
+    selectedCharIdx: number
+    selectedChars: number[];
+
+    bioItems: Phaser.GameObjects.Text[];
+    playerSelectTexts: Phaser.GameObjects.Text[];
+
     confirmButton: Phaser.GameObjects.Image;
 
     // ============ INITS ===========
@@ -59,6 +76,8 @@ export class MenuScene extends Phaser.Scene {
     }
 
     create(): void {
+        this.selectedCharIdx = 0
+        this.selectedChars = []
         this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
         this.bgImage.setScale(SF, SF)
         this.bgImage.setDepth(-100)
@@ -95,10 +114,19 @@ export class MenuScene extends Phaser.Scene {
         const tooltip = this.add.image(X_RHS, OY + YSPACE * 2, 'tooltip')
         const confirmButton = this.add.image(X_RHS + X_LHS, YSPACE * 3.5, 'confirm')
 
+        const p1Char = this.add.text(X_LHS - 80, YSPACE * 4.5, 'P1: ???', p1Style)
+        const p2Char = this.add.text(X_RHS, YSPACE * 4.5, 'P2: ???', p2Style)
+
         for (let item of [bio, tooltip, confirmButton]) {
             this.charSelectItems.push(item)
             item.setScale(SF, SF)
             item.postFX.addShadow(0, 2, 0.015)
+        }
+
+        this.playerSelectTexts = []
+        for (let item of [p1Char, p2Char]) {
+            this.charSelectItems.push(item)
+            this.playerSelectTexts.push(item)
         }
 
         confirmButton.setInteractive()
@@ -113,6 +141,7 @@ export class MenuScene extends Phaser.Scene {
         const toolName = this.add.text(X_RHS - 180, YSPACE * 2 + 70, this.currentBio.tooltipName, bioNameStyle)
         const toolDesc = this.add.text(X_RHS - 180, YSPACE * 2 + 130, this.currentBio.tooltip, bioStyle)
 
+        this.bioItems = []
         for (let item of [bioTitle, bioText, toolName, toolDesc]) {
             this.charSelectItems.push(item)
             item.postFX.addShadow(0, 2, 0.015)
@@ -187,17 +216,23 @@ export class MenuScene extends Phaser.Scene {
     }
 
     onConfirmDown() {
-        this.selectedChars.push(this.selectedCharIdx)
+        const i = this.selectedCharIdx
+        this.selectedChars.push(i)
         this.confirmButton.setScale(SF, SF)
         if (this.selectedChars.length == 2) {
             this.scene.start('GameScene', { p1: this.selectedChars[0], p2: this.selectedChars[1] })
         }
+        const bioName: string = characterBios[CHAR_NAMES[i]].name
+        const name = bioName.split(",")[0]
+        this.playerSelectTexts[0].setText('P1: ' + name)
     }
 
     initAnims(): void {
         for (let name of CHAR_NAMES) {
             const tag = this.anims.createFromAseprite(name);
         }
+
+        const sprs: Phaser.GameObjects.Sprite[] = []
         for (let i = 0; i < 4; i++) {
             const c = CHAR_NAMES[i]
             const spr = new Phaser.GameObjects.Sprite(this, X_LHS - 10, 124 + i * YSPACE, c);
@@ -207,11 +242,10 @@ export class MenuScene extends Phaser.Scene {
             this.add.existing(spr);
             spr.postFX.addShadow(0, 2, 0.008)
             this.charSelectItems.push(spr)
-            this.charSprites.push(spr)
+            sprs.push(spr)
         }
-        this.charSprites[0].anims.resume();
+        this.charSprites = sprs
+        sprs[0].anims.resume();
     }
-
-
 
 }

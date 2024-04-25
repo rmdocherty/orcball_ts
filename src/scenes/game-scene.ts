@@ -1,12 +1,12 @@
 
 import { GraphicDot } from '../objects/dots';
-import { AbilityButton } from '../objects/button';
+import { AbilityButton, MenuButton } from '../objects/button';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
 import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES, GameStart } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
-import { Data } from 'phaser';
+import { bioNameStyle } from './menu-scene';
 
 
 const FUDGE_PX = 3
@@ -79,7 +79,7 @@ export class GameScene extends Phaser.Scene {
     const tag = this.anims.createFromAseprite('ball');
 
     this.initBG()
-
+    this.initBanner()
 
     this.gfxDots = this.initDots(this.logicGame);
 
@@ -88,10 +88,6 @@ export class GameScene extends Phaser.Scene {
 
     this.tmpLine = this.initLine()
     this.add.existing(this.tmpLine)
-
-    const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
-    this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
-    this.add.existing(this.playerBanner)
 
     this.p1Button = new AbilityButton(this, 640, 1160, this.logicGame.p1Details)
     this.p1Button.on('ability_clicked', this.onButtonPress.bind(this))
@@ -157,6 +153,16 @@ export class GameScene extends Phaser.Scene {
     this.validMoves = validMoves;
     // TODO: filter for new valid moves and show them with purple dot
     this.setHighlightValidMoves(validMoves, true);
+  }
+
+  quit(): void {
+    this.scene.start('MenuScene')
+  }
+
+  restart(): void {
+    const p1Details = this.logicGame.p1Details
+    const p2Details = this.logicGame.p2Details
+    this.scene.start('GameScene', { p1: p1Details.character, p2: p2Details.character })
   }
 
   // ============ EVENTS ===========
@@ -243,6 +249,21 @@ export class GameScene extends Phaser.Scene {
     const lineColour = Phaser.Display.Color.GetColor32(203, 219, 252, 255);
     const tmpLine = this.createLine(0, 0, 0, 0, lineColour, 2 * LINE_WIDTH, false)
     return tmpLine
+  }
+
+  initBanner(): void {
+    const bannerColour = colourEnumToPhaserColor(Colours.P1_COL)
+    this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
+    this.add.existing(this.playerBanner)
+
+    const y = GAME_H - BANNER_H - 5
+    const quit = new MenuButton(this, GAME_W - 100, y, 'Quit', bioNameStyle)
+    const restart = new MenuButton(this, GAME_W - 250, y, 'Restart', bioNameStyle)
+    const mute = new MenuButton(this, GAME_W - 400, y, 'Mute', bioNameStyle)
+
+    quit.on('pointerdown', this.quit.bind(this))
+    restart.on('pointerdown', this.restart.bind(this))
+
   }
 
   createLine(x0: number, y0: number, x1: number, y1: number, color: number, width: number, visible: boolean = false): Phaser.GameObjects.Line {
