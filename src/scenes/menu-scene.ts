@@ -1,5 +1,5 @@
 import { wrap } from 'module';
-import { GAME_H, GAME_W, SF, CHAR_NAMES } from '../interfaces/shared';
+import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared';
 import { MenuButton, itemStyle } from '../objects/button';
 
 
@@ -74,6 +74,24 @@ export class MenuScene extends Phaser.Scene {
         for (let sprite of CHAR_NAMES) {
             this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
         }
+
+        this.load.image('bg', '../assets/tiles/bg.png')
+        this.load.image('walls', '../assets/tiles/walls.png')
+        for (let btn of ["p1_button", "p2_button"]) {
+            this.load.image(btn, '../assets/buttons/' + btn + '.png')
+        }
+
+        for (let icon of CHAR_NAMES) {
+            this.load.image(icon + "_ability", '../assets/non_cc/' + icon + '_ability.png')
+        }
+        for (let sprite of CHAR_NAMES) {
+            this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
+        }
+        for (let name of DOT_NAMES) {
+            this.load.aseprite(name, '../assets/tiles/' + name + '_dot.png', '../assets/tiles/' + name + '_dot.json')
+        }
+        this.load.aseprite('ball', '../assets/tiles/ball.png', '../assets/tiles/ball.json')
+        this.load.image('win_popup', '../assets/menus/bio_frame.png')
 
         this.preloadAudio()
     }
