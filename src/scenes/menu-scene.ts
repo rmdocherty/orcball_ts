@@ -100,8 +100,10 @@ export class MenuScene extends Phaser.Scene {
 
         const bioTitle = this.add.text(X_RHS - 180, YSPACE - 150, this.currentBio.name, bioNameStyle)
         const bioText = this.add.text(X_RHS - 180, YSPACE - 90, this.currentBio.desc, bioStyle)
+        const toolName = this.add.text(X_RHS - 180, YSPACE * 2 + 70, this.currentBio.tooltipName, bioNameStyle)
+        const toolDesc = this.add.text(X_RHS - 180, YSPACE * 2 + 130, this.currentBio.tooltip, bioStyle)
 
-        for (let item of [bioTitle, bioText]) {
+        for (let item of [bioTitle, bioText, toolName, toolDesc]) {
             this.charSelectItems.push(item)
             item.postFX.addShadow(0, 2, 0.015)
             this.bioItems.push(item)
@@ -146,7 +148,7 @@ export class MenuScene extends Phaser.Scene {
     // ============ CHARACTER SELECT ===========
     onFrameClick(i: number) {
         const newBio: Bio = characterBios[CHAR_NAMES[i]]
-        const newText = [newBio.name, newBio.desc]
+        const newText = [newBio.name, newBio.desc, newBio.tooltipName, newBio.tooltip]
         for (let i = 0; i < newText.length; i++) {
             this.bioItems[i].setText(newText[i])
         }
