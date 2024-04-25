@@ -41,6 +41,7 @@ export const p2Style: Phaser.Types.GameObjects.Text.TextStyle = {
 }
 
 export class MenuScene extends Phaser.Scene {
+    // DEFAULT INITS BAD WHEN CHANGING SCENES!
     bgImage: Phaser.GameObjects.Image
     title: Phaser.GameObjects.Text
     menuItems: Phaser.GameObjects.GameObject[] = []
@@ -245,7 +246,7 @@ export class MenuScene extends Phaser.Scene {
             sprs.push(spr)
         }
         this.charSprites = sprs
-        sprs[0].anims.resume();
+        sprs[this.selectedCharIdx].anims.resume();
     }
 
 }

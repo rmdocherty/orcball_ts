@@ -37,6 +37,8 @@ export class GameScene extends Phaser.Scene {
   private validMoves: Point[] = [];
   private logicGame: LogicGame;
 
+  private muted: boolean
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -95,6 +97,8 @@ export class GameScene extends Phaser.Scene {
     this.p2Button = new AbilityButton(this, 110, 136, this.logicGame.p2Details)
     this.p2Button.on('ability_clicked', this.onButtonPress.bind(this))
     this.add.existing(this.p2Button)
+
+    this.muted = false
 
     this.initAnims();
     this.handleMoveEnd(ballPos, ballPos);
@@ -163,6 +167,19 @@ export class GameScene extends Phaser.Scene {
     const p1Details = this.logicGame.p1Details
     const p2Details = this.logicGame.p2Details
     this.scene.start('GameScene', { p1: p1Details.character, p2: p2Details.character })
+  }
+
+  mute(text: Phaser.GameObjects.Text): void {
+    if (this.muted) {
+      text.setText('Mute')
+    } else {
+      text.setText('Unumute')
+    }
+    this.muted = !this.muted
+  }
+
+  onWin(): void {
+
   }
 
   // ============ EVENTS ===========
@@ -256,14 +273,25 @@ export class GameScene extends Phaser.Scene {
     this.playerBanner = new Phaser.GameObjects.Rectangle(this, 0, GAME_H - BANNER_H, GAME_W * 2, BANNER_H * 2, bannerColour)
     this.add.existing(this.playerBanner)
 
+    const newStyle = {
+      fontFamily: "fibberish", fontSize: 48, shadow: {
+        color: '#000000',
+        fill: true,
+        offsetX: 1,
+        offsetY: 1,
+        stroke: true,
+        blur: 5,
+      }
+    }
+
     const y = GAME_H - BANNER_H - 5
-    const quit = new MenuButton(this, GAME_W - 100, y, 'Quit', bioNameStyle)
-    const restart = new MenuButton(this, GAME_W - 250, y, 'Restart', bioNameStyle)
-    const mute = new MenuButton(this, GAME_W - 400, y, 'Mute', bioNameStyle)
+    const quit = new MenuButton(this, GAME_W - 100, y, 'Quit', newStyle)
+    const restart = new MenuButton(this, GAME_W - 250, y, 'Restart', newStyle)
+    const mute = new MenuButton(this, 100, y, 'Mute', newStyle)
 
     quit.on('pointerdown', this.quit.bind(this))
     restart.on('pointerdown', this.restart.bind(this))
-
+    mute.on('pointerdown', this.mute.bind(this, mute))
   }
 
   createLine(x0: number, y0: number, x1: number, y1: number, color: number, width: number, visible: boolean = false): Phaser.GameObjects.Line {
