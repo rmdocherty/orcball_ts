@@ -323,8 +323,11 @@ export class LogicGame {
         this.adjMat = getAdjMat(this.grid);
 
         const hw = Math.floor(w / 2);
-        this.p1Goal = { x: hw, y: 0 };
-        this.p2Goal = { x: hw, y: h - 1 };
+
+        // to align with how it appears on screen!
+        this.p1Goal = { x: hw, y: h - 1 };
+        this.p2Goal = { x: hw, y: 0 };
+
 
         this.player = Player.P1;
         this.ballPos = { x: 4, y: 5 };

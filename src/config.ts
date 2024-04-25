@@ -10,7 +10,8 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   backgroundColor: 0x8b9150,
   type: Phaser.AUTO,
   scale: {
-    mode: Phaser.Scale.FIT, // maybe use RESIZE mode?
+    mode: Phaser.Scale.FIT // used to be FIT
+    , // maybe use RESIZE mode?
     autoCenter: Phaser.Scale.CENTER_BOTH, // CENTER_HORIZONTALLY
     parent: 'game',
     // was both '100%

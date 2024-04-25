@@ -5,10 +5,10 @@ import { MenuButton, itemStyle } from '../objects/button';
 
 let characterBios = require('../assets/data.json')
 
-const OY = 160
-const YSPACE = 240
-const X_LHS = 140
-const X_RHS = 500
+export const OY = 160
+export const YSPACE = 240
+export const X_LHS = 140
+export const X_RHS = 500
 
 interface Bio {
     name: string,

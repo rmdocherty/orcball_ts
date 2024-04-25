@@ -1,12 +1,12 @@
 
 import { GraphicDot } from '../objects/dots';
-import { AbilityButton, MenuButton } from '../objects/button';
+import { AbilityButton, MenuButton, itemStyle } from '../objects/button';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
 import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES, GameStart } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
-import { bioNameStyle } from './menu-scene';
+import { X_LHS } from './menu-scene';
 
 
 const FUDGE_PX = 3
@@ -22,9 +22,13 @@ export class GameScene extends Phaser.Scene {
   private gfxDots: GraphicDot[];
   private drawnLines: Phaser.GameObjects.Line[] = [];
   private tmpLine: Phaser.GameObjects.Line;
-  private playerBanner: Phaser.GameObjects.Rectangle;
+
   private bgImage: Phaser.GameObjects.Image;
   private walls: Phaser.GameObjects.Image;
+
+  private playerBanner: Phaser.GameObjects.Rectangle;
+  private quitButton: Phaser.GameObjects.Text;
+  private restartButton: Phaser.GameObjects.Text;
 
   private p1Button: AbilityButton
   private p2Button: AbilityButton
@@ -36,6 +40,7 @@ export class GameScene extends Phaser.Scene {
   private abilityActive: boolean = false
   private validMoves: Point[] = [];
   private logicGame: LogicGame;
+  private winState: WinState
 
   private muted: boolean
 
@@ -64,6 +69,7 @@ export class GameScene extends Phaser.Scene {
       this.load.aseprite(name, '../assets/tiles/' + name + '_dot.png', '../assets/tiles/' + name + '_dot.json')
     }
     this.load.aseprite('ball', '../assets/tiles/ball.png', '../assets/tiles/ball.json')
+    this.load.image('win_popup', '../assets/menus/bio_frame.png')
   }
 
 
@@ -82,6 +88,8 @@ export class GameScene extends Phaser.Scene {
 
     this.initBG()
     this.initBanner()
+
+    this.winState = WinState.NONE
 
     this.gfxDots = this.initDots(this.logicGame);
 
@@ -102,6 +110,7 @@ export class GameScene extends Phaser.Scene {
 
     this.initAnims();
     this.handleMoveEnd(ballPos, ballPos);
+
   }
 
   // ============ GAME LOGIC ===========
@@ -179,7 +188,16 @@ export class GameScene extends Phaser.Scene {
   }
 
   onWin(): void {
+    const rect = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x4f4d46, 20)
+    const popup = this.add.image(GAME_W / 2, GAME_H / 2 - 100, 'win_popup')
+    const text = this.add.text(X_LHS + 100, GAME_H / 2 - 280, 'P' + this.winState.toString() + ' Wins!', itemStyle)
 
+    this.restartButton.setPosition(X_LHS + 230, GAME_H / 2 - 120)
+    this.restartButton.setDepth(100)
+
+    this.quitButton.setPosition(X_LHS + 230, GAME_H / 2 - 30)
+    this.quitButton.setDepth(100)
+    popup.setScale(SF, SF)
   }
 
   // ============ EVENTS ===========
@@ -218,9 +236,7 @@ export class GameScene extends Phaser.Scene {
       this.playerBanner.fillColor = newColour
     }
 
-    if (summary.winState != WinState.NONE) {
-      console.log("Game over, " + summary.winState.toString())
-    }
+    this.winState = summary.winState
     this.handleMoveEnd(ballPoint, queryPoint)
   }
 
@@ -292,6 +308,9 @@ export class GameScene extends Phaser.Scene {
     quit.on('pointerdown', this.quit.bind(this))
     restart.on('pointerdown', this.restart.bind(this))
     mute.on('pointerdown', this.mute.bind(this, mute))
+
+    this.quitButton = quit
+    this.restartButton = restart
   }
 
   createLine(x0: number, y0: number, x1: number, y1: number, color: number, width: number, visible: boolean = false): Phaser.GameObjects.Line {
@@ -385,5 +404,10 @@ export class GameScene extends Phaser.Scene {
   moveEnded(): void {
     this.ball.anims.pause()
     this.ball.updatePos(this.logicGame.ballPos)
+
+    if (this.winState != WinState.NONE) {
+      console.log("Game over, " + this.winState.toString())
+      this.onWin()
+    }
   }
 }
