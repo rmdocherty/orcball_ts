@@ -1,9 +1,9 @@
 import { wrap } from 'module';
-import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared';
+import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES, Player, Character } from '../interfaces/shared';
 import { MenuButton, itemStyle, } from '../objects/button';
 import { Tutorial } from '../objects/tutorial';
 
-import { Peer } from "peerjs"
+import { Peer, DataConnection } from "peerjs"
 
 // change audio to not be .ogg to fix mobile crashes
 
@@ -13,6 +13,20 @@ export const OY = 160
 export const YSPACE = 240
 export const X_LHS = 140
 export const X_RHS = 500
+
+const words: string = "acdefghijklmnopqrstuvwyzABCEDFGHIJKLMNOPQRSTUVWYZ1234567890"
+const rand = (l: number): number => { return Math.floor(Math.random() * l) }
+//let peer: Peer = null;
+//let conn: DataConnection = null;
+
+interface MPConnection {
+    peer: Peer,
+    id: string,
+    conn: DataConnection | null,
+    peerid: string,
+    whichPlayer: Player
+}
+
 
 interface Bio {
     name: string,
@@ -67,6 +81,8 @@ export class MenuScene extends Phaser.Scene {
 
     confirmButton: Phaser.GameObjects.Image;
 
+    mpConnection: MPConnection
+
     // ============ INITS ===========
     constructor() {
         super({ key: 'MenuScene' });
@@ -111,7 +127,9 @@ export class MenuScene extends Phaser.Scene {
         this.load.image('arrow', './assets/buttons/page_fwd.png')
 
         this.preloadAudio()
+        this.initMultiplayer()
     }
+
 
     preloadAudio(): void {
         this.load.audio('main_music', './assets/music/embark.mp3')
@@ -123,7 +141,7 @@ export class MenuScene extends Phaser.Scene {
 
     create(): void {
         this.selectedCharIdx = 0
-        this.selectedChars = []
+        this.selectedChars = [Character.NONE, Character.NONE]
         this.bgImage = new Phaser.GameObjects.Image(this, GAME_W / 2, GAME_H / 2, 'bg')
         this.bgImage.setScale(SF, SF)
         this.bgImage.setDepth(-100)
@@ -150,6 +168,8 @@ export class MenuScene extends Phaser.Scene {
         this.backButton.visible = false;
         this.backButton.on('pointerdown', this.hideTutorial.bind(this))
         this.add.existing(this.tutorial)
+
+        this.checkMultiplayer();
     }
 
     createCharSelect(): void {
@@ -247,11 +267,12 @@ export class MenuScene extends Phaser.Scene {
     }
 
     loadOnline() {
+        //this.initMultiplayer()
         console.log('online')
         this.sound.play('accept')
         this.backButton.visible = true
         this.setMenuVis(false)
-        this.setCharSelect(true)
+        this.setCharSelect(false)
         this.initAnims()
     }
 
@@ -287,15 +308,34 @@ export class MenuScene extends Phaser.Scene {
 
     onConfirmDown() {
         const i = this.selectedCharIdx
-        this.selectedChars.push(i)
-        this.confirmButton.setScale(SF, SF)
-        if (this.selectedChars.length == 2) {
-            this.scene.start('GameScene', { p1: this.selectedChars[0], p2: this.selectedChars[1] })
+
+        const isOnline = (this.mpConnection.peerid != null)
+        if (this.selectedChars.length == 1 && isOnline) {
+            return; // don't set opponent
         }
+
+        let player: Player
+        if (isOnline) {
+            player = this.mpConnection.whichPlayer
+            this.mpConnection.conn.send("character:" + i.toString())
+        } else {
+            player = (this.selectedChars[Player.P1] == Character.NONE) ? Player.P1 : Player.P2
+        }
+        this.updateCharSelect(player, i)
+        this.confirmButton.setScale(SF, SF)
         const bioName: string = characterBios[CHAR_NAMES[i]].name
         const name = bioName.split(",")[0]
-        this.playerSelectTexts[0].setText('P1: ' + name)
+        const currentP = this.mpConnection.whichPlayer
+        this.playerSelectTexts[currentP].setText('P' + (currentP + 1).toString() + ': ' + name)
         this.sound.play('accept')
+    }
+
+    updateCharSelect(player: Player, char: Character): void {
+        this.selectedChars[player] = char
+
+        if ((this.selectedChars[0] != Character.NONE) && (this.selectedChars[1] != Character.NONE)) {
+            this.scene.start('GameScene', { p1: this.selectedChars[0], p2: this.selectedChars[1] })
+        }
     }
 
     initAnims(): void {
@@ -317,6 +357,79 @@ export class MenuScene extends Phaser.Scene {
         }
         this.charSprites = sprs
         sprs[this.selectedCharIdx].anims.resume();
+    }
+
+    // ============ NETWORKING ===========
+
+    initMultiplayer(): void {
+        const len: number = words.length - 1
+        const baseId: number[] = [0, 0, 0, 0]
+        const id: string = baseId.map(p => words[rand(len)]).join('')
+        console.log("/?" + id)
+        //window.location.href += "?" + id
+        //const id = "test"
+
+        const peer = new Peer(id, { debug: 2 })
+        console.log(peer)
+        peer.on('connection', (conn: DataConnection) => {
+            console.log('connect')
+            conn.on("open", () => {
+                conn.send("id:" + this.mpConnection.id);
+                this.mpConnection.conn = conn
+            });
+            conn.on("data", (data: string) => {
+                this.handleMPData(data);
+            });
+        })
+        this.mpConnection = { peer: peer, id: id, conn: null, peerid: "", whichPlayer: Player.P1 }
+    }
+
+    checkMultiplayer(): void {
+        const urlSplit: string[] = window.location.href.split('/')
+        const n = urlSplit.length - 1
+        const wantsConnect = (urlSplit[n].length == 5) && (urlSplit[n][0] == "?")
+
+        if (wantsConnect) {
+            const peerid = urlSplit[n].slice(1)
+            console.log(peerid)
+            const conn = this.mpConnection.peer.connect(peerid) // peerid
+            conn.on('open', () => {
+                conn.send("id:" + this.mpConnection.id)
+                conn.send("player:" + (1 - which).toString())
+                this.loadMPCharSelect()
+            })
+            conn.on("data", (data: string) => {
+                this.handleMPData(data)
+            });
+            const which = rand(1)
+
+            this.mpConnection.conn = conn
+            this.mpConnection.whichPlayer = which
+        }
+    }
+
+    handleMPData(data: string) {
+        const getData = (d: string): string => { return d.split(':')[1] }
+        if (data.includes("id:")) {
+            this.mpConnection.peerid = getData(data)
+            console.log("opponent id: " + getData(data))
+        } else if (data.includes("player:")) {
+            this.mpConnection.whichPlayer = parseInt(getData(data))
+            this.loadMPCharSelect()
+            console.log(getData(data))
+            //assign playesr
+        } else if (data.includes("character:")) {
+            const otherChar = parseInt(getData(data))
+            this.updateCharSelect(1 - this.mpConnection.whichPlayer, otherChar)
+            //handle char select
+        }
+    }
+
+    loadMPCharSelect(): void {
+        this.initAnims()
+        this.setMenuVis(false)
+        this.setCharSelect(true)
+        this.backButton.visible = true
     }
 
 }
