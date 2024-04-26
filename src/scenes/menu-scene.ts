@@ -3,6 +3,8 @@ import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared'
 import { MenuButton, itemStyle, } from '../objects/button';
 import { Tutorial } from '../objects/tutorial';
 
+import { Peer } from "peerjs"
+
 // change audio to not be .ogg to fix mobile crashes
 
 let characterBios = require('/assets/data.json')
