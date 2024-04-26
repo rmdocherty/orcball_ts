@@ -128,11 +128,12 @@ export class MenuScene extends Phaser.Scene {
 
     preloadAudio(): void {
         this.load.audio('main_music', './assets/music/embark.mp3')
-        const fnames = ["ability_used", "accept", "invalid", "kick1", "kick2", "kick3", "mage_ability", "orc_ability", "ranger_ability", "warrior_ability", "win"]
+        const fnames = ["intro_", "ability_used", "accept", "invalid", "kick1", "kick2", "kick3", "mage_ability", "orc_ability", "ranger_ability", "warrior_ability", "win",]
         for (let fname of fnames) {
             this.load.audio(fname, './assets/music/' + fname + ".wav")
         }
     }
+
 
     create(): void {
         this.selectedCharIdx = 0
@@ -167,6 +168,8 @@ export class MenuScene extends Phaser.Scene {
         this.backButton.visible = false;
         this.backButton.on('pointerdown', this.hideTutorial.bind(this))
         this.add.existing(this.tutorial)
+
+        this.sound.play('intro_')
 
         //this.checkMultiplayer();
     }
