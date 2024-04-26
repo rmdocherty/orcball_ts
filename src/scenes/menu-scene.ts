@@ -386,12 +386,13 @@ export class MenuScene extends Phaser.Scene {
     }
 
     checkMultiplayer(): void {
-        const urlSplit: string[] = window.location.href.split('/')
+        const urlSplit: string[] = window.location.href.split('?')
         const n = urlSplit.length - 1
-        const wantsConnect = (urlSplit[n].length == 5) && (urlSplit[n][0] == "?")
+        console.log(n)
+        const wantsConnect = (n > 0)
 
         if (wantsConnect) {
-            const peerid = urlSplit[n].slice(1)
+            const peerid = urlSplit[n]
             console.log(peerid)
             this.mpConnection.mode = "online"
             const conn = this.mpConnection.peer.connect(peerid) // peerid

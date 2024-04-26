@@ -2,9 +2,8 @@ import { GAME_H, GAME_W, SF } from "../interfaces/shared"
 import { tutorialTextStyle } from "./tutorial"
 import { MenuButton } from "./button"
 
-const msg = "Send this link to a friend! When they join the game will start automatically."
-
-
+const msg = "Send this link to a friend! When they join the game will start automatically. (NB: will open an alert as can't access clipboard on itch)"
+const URL = (true) ? "https://avaloggames.itch.io/orcball?" : "localhost:8080?"
 
 export const inviteButonStyle = {
     fontFamily: 'fibberish',
@@ -25,7 +24,7 @@ export class Invite extends Phaser.GameObjects.Container {
     constructor(scene: Phaser.Scene, id: string) {
         super(scene)
         const frame = new Phaser.GameObjects.Image(scene, GAME_W / 2, GAME_H / 2, 'tutorial_frame')
-        const url = "localhost:8080/?" + id //TODO: CHANGE FOR RELEASE
+        const url = URL + id //TODO: CHANGE FOR RELEASE
 
         const text = new Phaser.GameObjects.Text(this.scene, GAME_W / 2 - 290, GAME_H / 2 - 200, msg, tutorialTextStyle)
         const urlText = new Phaser.GameObjects.Text(this.scene, GAME_W / 2 - 290, GAME_H / 2, url, tutorialTextStyle)
@@ -48,6 +47,8 @@ export class Invite extends Phaser.GameObjects.Container {
     }
 
     copyContent = async (id: string) => {
+
+        alert(id)
         try {
             await navigator.clipboard.writeText(id);
             console.log('Content copied to clipboard');
