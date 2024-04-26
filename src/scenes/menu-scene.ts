@@ -4,6 +4,7 @@ import { MenuButton, itemStyle, } from '../objects/button';
 import { Tutorial } from '../objects/tutorial';
 
 import { Peer, DataConnection } from "peerjs"
+import { Invite } from '../objects/invite';
 
 // change audio to not be .ogg to fix mobile crashes
 
@@ -64,6 +65,7 @@ export class MenuScene extends Phaser.Scene {
     backButton: Phaser.GameObjects.Text;
 
     tutorial: Tutorial;
+    invite: Invite
 
     currentBio: Bio = characterBios["warrior"]
     selectedCharIdx: number
@@ -157,6 +159,9 @@ export class MenuScene extends Phaser.Scene {
         this.tutorial = new Tutorial(this)
         this.tutorial.visible = false
 
+        this.invite = new Invite(this, this.mpConnection.id)
+        this.invite.visible = false
+
         this.backButton = new MenuButton(this, GAME_W / 2, GAME_H - 80, 'back', itemStyle)
         this.backButton.visible = false;
         this.backButton.on('pointerdown', this.hideTutorial.bind(this))
@@ -247,7 +252,7 @@ export class MenuScene extends Phaser.Scene {
         this.setCharSelect(false)
         this.tutorial.visible = false
         this.setMenuVis(true)
-
+        this.invite.visible = false
     }
 
     loadLocal() {
@@ -267,6 +272,7 @@ export class MenuScene extends Phaser.Scene {
         this.backButton.visible = true
         this.setMenuVis(false)
         this.mpConnection.mode = "online"
+        this.invite.visible = true
     }
 
     // ============ CHARACTER SELECT ===========
@@ -363,7 +369,6 @@ export class MenuScene extends Phaser.Scene {
         //const id = "test"
 
         const peer = new Peer(id, { debug: 2 })
-        console.log(peer)
         peer.on('connection', (conn: DataConnection) => {
             console.log('connect')
             conn.on("open", () => {
@@ -373,6 +378,9 @@ export class MenuScene extends Phaser.Scene {
             conn.on("data", (data: string) => {
                 this.handleMPData(data);
             });
+            conn.on("close", () => {
+                this.scene.start('MenuScene')
+            })
         })
         this.mpConnection = { peer: peer, id: id, conn: null, peerid: "", whichPlayer: Player.P1, moveFn: null, abilityFn: null, mode: "local" }
     }
@@ -395,6 +403,9 @@ export class MenuScene extends Phaser.Scene {
             conn.on("data", (data: string) => {
                 this.handleMPData(data)
             });
+            conn.on('close', () => {
+                this.scene.start('MenuScene')
+            })
             const which = rand(1)
 
             this.mpConnection.conn = conn
@@ -434,6 +445,7 @@ export class MenuScene extends Phaser.Scene {
         this.initAnims()
         this.setMenuVis(false)
         this.setCharSelect(true)
+        this.invite.visible = false
         this.backButton.visible = true
     }
 

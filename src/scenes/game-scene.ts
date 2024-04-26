@@ -206,6 +206,10 @@ export class GameScene extends Phaser.Scene {
 
   quit(): void {
     this.music.stop()
+    if (this.isOnline) {
+      this.mpConnection.conn.close()
+    }
+
     this.scene.start('MenuScene')
   }
 
@@ -213,7 +217,7 @@ export class GameScene extends Phaser.Scene {
     this.music.stop()
     const p1Details = this.logicGame.p1Details
     const p2Details = this.logicGame.p2Details
-    this.scene.start('GameScene', { p1: p1Details.character, p2: p2Details.character })
+    this.scene.start('GameScene', { p1: p1Details.character, p2: p2Details.character, mpConnection: this.mpConnection },)
   }
 
   mute(text: Phaser.GameObjects.Text): void {
@@ -267,6 +271,7 @@ export class GameScene extends Phaser.Scene {
     const ballPoint = this.logicGame.ballPos
     const queryPoint = dot.logicPos
     if (!this.checkPointValid(queryPoint)) {
+      this.sound.play('invalid')
       return
     }
     if (this.isOnline && (this.mpConnection.whichPlayer == this.logicGame.player)) {

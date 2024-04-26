@@ -108,10 +108,11 @@ export const itemStyle = {
 }
 
 export class MenuButton extends Phaser.GameObjects.Text {
-    constructor(scene: Phaser.Scene, x: number, y: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle) {
+    constructor(scene: Phaser.Scene, x: number, y: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle, addAuto: boolean = true) {
         super(scene, x, y, text, style)
         this.setOrigin(0.5, 0.5)
-        this.scene.add.existing(this)
+        if (addAuto) { this.scene.add.existing(this) }
+
         this.initInputs()
     }
 

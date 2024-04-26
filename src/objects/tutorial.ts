@@ -1,6 +1,5 @@
 import { SF, GAME_H, GAME_W } from "../interfaces/shared"
 import { X_LHS, X_RHS, YSPACE } from "../scenes/menu-scene";
-import { MenuButton, itemStyle } from "./button";
 
 
 export const tutorialTextStyle = {
