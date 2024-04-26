@@ -160,6 +160,7 @@ export class MenuScene extends Phaser.Scene {
         this.tutorial.visible = false
 
         this.invite = new Invite(this, this.mpConnection.id)
+        this.invite.enter.on('pointerdown', this.promptForCode.bind(this))
         this.invite.visible = false
 
         this.backButton = new MenuButton(this, GAME_W / 2, GAME_H - 80, 'back', itemStyle)
@@ -167,7 +168,7 @@ export class MenuScene extends Phaser.Scene {
         this.backButton.on('pointerdown', this.hideTutorial.bind(this))
         this.add.existing(this.tutorial)
 
-        this.checkMultiplayer();
+        //this.checkMultiplayer();
     }
 
     createCharSelect(): void {
@@ -385,14 +386,22 @@ export class MenuScene extends Phaser.Scene {
         this.mpConnection = { peer: peer, id: id, conn: null, peerid: "", whichPlayer: Player.P1, moveFn: null, abilityFn: null, mode: "local" }
     }
 
-    checkMultiplayer(): void {
-        const urlSplit: string[] = window.location.href.split('?')
+    checkMultiplayer(peerid: string): void {
+        let parentURl: string
+        //console.log(window.parent.location.href)
+        if (document.referrer != "") {
+            parentURl = document.referrer
+        } else {
+            parentURl = window.location.href
+        }
+        //console.log(parentURl)
+        //console.log(document.referrer)
+        const urlSplit: string[] = parentURl.split('?')
         const n = urlSplit.length - 1
-        console.log(n)
-        const wantsConnect = (n > 0)
+        const wantsConnect = true //(n > 0)
 
         if (wantsConnect) {
-            const peerid = urlSplit[n]
+            //const peerid = urlSplit[n]
             console.log(peerid)
             this.mpConnection.mode = "online"
             const conn = this.mpConnection.peer.connect(peerid) // peerid
@@ -448,6 +457,17 @@ export class MenuScene extends Phaser.Scene {
         this.setCharSelect(true)
         this.invite.visible = false
         this.backButton.visible = true
+    }
+
+    promptForCode(): void {
+        const result = prompt("Enter room code:")
+        if (result.length != 4) {
+            return
+        }
+        else {
+            console.log('connect mp')
+            this.checkMultiplayer(result)
+        }
     }
 
 }
