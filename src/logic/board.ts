@@ -162,6 +162,9 @@ const getWallDotAdjVec = (p: Point, dotGrid: Grid, neighbours: Point[]): AdjVect
             case Dot.EMPTY:
                 adj[p_to_i(n, w)] = Link.VALID;
                 break;
+            case Dot.FILLED:
+                adj[p_to_i(n, w)] = Link.VALID;
+                break;
             case Dot.GOAL:
                 adj[p_to_i(n, w)] = Link.VALID;
                 break;
