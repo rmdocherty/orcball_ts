@@ -4,6 +4,8 @@ Paper football with fantasy powerups.
 
 Inspired by the excellent [Tracesoccer](https://tracesoccer.io/)
 
+Apologies to [Orcball](https://gshowitt.itch.io/orcball), the single-page tabletop RPG I'm namesquatting (promise I came up with it myself).
+
 # Assets:
 Tiles from ['fantasy'](https://analogstudios.itch.io/fantasy) by analogstudios (good name!) (CC-0)
 
@@ -14,7 +16,7 @@ Music from ['8-bit RPG/Adventure Music Pack I' by Francesco Fabrizio](https://fr
 Ability icons from ['Raven Fantasy RPG Icons'](https://clockworkraven.itch.io/raven-fantasy-rpg-icons-pixel-art-icons-textures-and-sprites-expanded-skills) - a great pack but sadly not CC so can't include in source code
 
 # Tools:
-[Phaser](https://phaser.io/) and the excellent [phaser3-typescript](https://github.com/digitsensitive/phaser3-typescript)
+[Phaser](https://phaser.io/) and the brill [phaser3-typescript](https://github.com/digitsensitive/phaser3-typescript)
 
 [peerjs](https://peerjs.com/) for multiplayer 
 
