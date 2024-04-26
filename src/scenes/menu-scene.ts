@@ -4,7 +4,7 @@ import { MenuButton, itemStyle, } from '../objects/button';
 import { Tutorial } from '../objects/tutorial';
 
 
-let characterBios = require('../assets/data.json')
+let characterBios = require('/assets/data.json')
 
 export const OY = 160
 export const YSPACE = 240
@@ -70,51 +70,51 @@ export class MenuScene extends Phaser.Scene {
     }
 
     preload(): void {
-        this.load.image('bg', '../assets/tiles/bg.png')
-        this.load.image('title', '../assets/menus/title.png')
-        this.load.image('frame', '../assets/menus/char_frame.png')
-        this.load.image('bio', '../assets/menus/bio_frame.png')
-        this.load.image('tooltip', '../assets/buttons/tooltip_frame.png')
-        this.load.image('confirm', '../assets/buttons/confirm_button.png')
+        this.load.image('bg', './assets/tiles/bg.png')
+        this.load.image('title', './assets/menus/title.png')
+        this.load.image('frame', './assets/menus/char_frame.png')
+        this.load.image('bio', './assets/menus/bio_frame.png')
+        this.load.image('tooltip', './assets/buttons/tooltip_frame.png')
+        this.load.image('confirm', './assets/buttons/confirm_button.png')
         for (let sprite of CHAR_NAMES) {
-            this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
+            this.load.aseprite(sprite, './assets/characters/' + sprite + '.png', './assets/characters/' + sprite + '.json')
         }
 
-        this.load.image('walls', '../assets/tiles/walls.png')
+        this.load.image('walls', './assets/tiles/walls.png')
         for (let btn of ["p1_button", "p2_button"]) {
-            this.load.image(btn, '../assets/buttons/' + btn + '.png')
+            this.load.image(btn, './assets/buttons/' + btn + '.png')
         }
 
         for (let icon of CHAR_NAMES) {
-            this.load.image(icon + "_ability", '../assets/non_cc/' + icon + '_ability.png')
+            this.load.image(icon + "_ability", './assets/non_cc/' + icon + '_ability.png')
         }
         for (let sprite of CHAR_NAMES) {
-            this.load.aseprite(sprite, '../assets/characters/' + sprite + '.png', '../assets/characters/' + sprite + '.json')
+            this.load.aseprite(sprite, './assets/characters/' + sprite + '.png', './assets/characters/' + sprite + '.json')
         }
         for (let name of DOT_NAMES) {
-            this.load.aseprite(name, '../assets/tiles/' + name + '_dot.png', '../assets/tiles/' + name + '_dot.json')
+            this.load.aseprite(name, './assets/tiles/' + name + '_dot.png', './assets/tiles/' + name + '_dot.json')
         }
-        this.load.aseprite('ball', '../assets/tiles/ball.png', '../assets/tiles/ball.json')
-        this.load.image('win_popup', '../assets/menus/bio_frame.png')
+        this.load.aseprite('ball', './assets/tiles/ball.png', './assets/tiles/ball.json')
+        this.load.image('win_popup', './assets/menus/bio_frame.png')
 
-        this.load.image('banner_1', '../assets/menus/banner_1.png')
-        this.load.image('banner_2', '../assets/menus/banner_2.png')
+        this.load.image('banner_1', './assets/menus/banner_1.png')
+        this.load.image('banner_2', './assets/menus/banner_2.png')
 
-        this.load.image('tutorial_frame', '../assets/menus/tutorial_frame.png')
+        this.load.image('tutorial_frame', './assets/menus/tutorial_frame.png')
         for (let i = 1; i < 7; i++) {
             const name = 't' + i.toString()
-            this.load.image(name, '../assets/menus/' + name + '.png')
+            this.load.image(name, './assets/menus/' + name + '.png')
         }
-        this.load.image('arrow', '../assets/buttons/page_fwd.png')
+        this.load.image('arrow', './assets/buttons/page_fwd.png')
 
         this.preloadAudio()
     }
 
     preloadAudio(): void {
-        this.load.audio('main_music', '../assets/music/embark.ogg')
+        this.load.audio('main_music', './assets/music/embark.ogg')
         const fnames = ["ability_used", "accept", "invalid", "kick1", "kick2", "kick3", "mage_ability", "orc_ability", "ranger_ability", "warrior_ability", "win"]
         for (let fname of fnames) {
-            this.load.audio(fname, '../assets/music/' + fname + ".wav")
+            this.load.audio(fname, './assets/music/' + fname + ".wav")
         }
     }
 

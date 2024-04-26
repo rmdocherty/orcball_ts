@@ -20,7 +20,7 @@ const centerPoint = (p: Point): Point => {
 export class GameScene extends Phaser.Scene {
   private ball: Ball;
   private gfxDots: GraphicDot[];
-  private drawnLines: Phaser.GameObjects.Line[] = [];
+  private drawnLines: Phaser.GameObjects.Line[];
   private tmpLine: Phaser.GameObjects.Line;
 
   private bgImage: Phaser.GameObjects.Image;
@@ -33,12 +33,12 @@ export class GameScene extends Phaser.Scene {
   private p1Button: AbilityButton
   private p2Button: AbilityButton
 
-  private tags: Phaser.Animations.Animation[][] = []
+  private tags: Phaser.Animations.Animation[][]
   private p1Sprite: Phaser.GameObjects.Sprite;
   private p2Sprite: Phaser.GameObjects.Sprite;
 
   private abilityActive: boolean = false
-  private validMoves: Point[] = [];
+  private validMoves: Point[];
   private logicGame: LogicGame;
   private winState: WinState
 
@@ -60,6 +60,9 @@ export class GameScene extends Phaser.Scene {
 
 
   create(): void {
+    this.validMoves = []
+    this.drawnLines = []
+    this.tags = []
 
     for (let name of CHAR_NAMES) {
       const tag = this.anims.createFromAseprite(name);
