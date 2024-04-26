@@ -51,6 +51,8 @@ export class MenuScene extends Phaser.Scene {
     frames: Phaser.GameObjects.Image[] = [];
     charSprites: Phaser.GameObjects.Sprite[]
 
+    backButton: Phaser.GameObjects.Text;
+
     tutorial: Tutorial;
 
     currentBio: Bio = characterBios["warrior"]
@@ -140,7 +142,10 @@ export class MenuScene extends Phaser.Scene {
 
         this.tutorial = new Tutorial(this)
         this.tutorial.visible = false
-        this.tutorial.gotoMenu.on('pointerdown', this.hideTutorial.bind(this))
+
+        this.backButton = new MenuButton(this, GAME_W / 2, GAME_H - 80, 'back', itemStyle)
+        this.backButton.visible = false;
+        this.backButton.on('pointerdown', this.hideTutorial.bind(this))
         this.add.existing(this.tutorial)
     }
 
@@ -215,18 +220,24 @@ export class MenuScene extends Phaser.Scene {
 
     loadTutorial() {
         console.log('tutorial')
+        this.sound.play('accept')
+        this.backButton.visible = true
         this.setMenuVis(false)
         this.tutorial.visible = true
     }
 
     hideTutorial() {
-        this.setMenuVis(true)
+        this.backButton.visible = false
+        this.setCharSelect(false)
         this.tutorial.visible = false
+        this.setMenuVis(true)
+
     }
 
     loadLocal() {
         console.log('local')
         this.sound.play('accept')
+        this.backButton.visible = true
         this.setMenuVis(false)
         this.setCharSelect(true)
         this.initAnims()
@@ -234,6 +245,8 @@ export class MenuScene extends Phaser.Scene {
 
     loadOnline() {
         console.log('online')
+        this.sound.play('accept')
+        this.backButton.visible = true
         this.setMenuVis(false)
         this.setCharSelect(true)
         this.initAnims()

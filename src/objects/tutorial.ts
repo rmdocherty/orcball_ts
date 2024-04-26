@@ -25,7 +25,7 @@ export class Tutorial extends Phaser.GameObjects.Container {
     pageNumber: number;
     tutorialImage: Phaser.GameObjects.Image;
     tutorialText: Phaser.GameObjects.Text;
-    gotoMenu: Phaser.GameObjects.Text;
+    //gotoMenu: Phaser.GameObjects.Text;
 
     constructor(scene: Phaser.Scene) {
         super(scene)
@@ -43,7 +43,7 @@ export class Tutorial extends Phaser.GameObjects.Container {
 
         this.tutorialText = new Phaser.GameObjects.Text(scene, GAME_W / 2 - 290, GAME_H / 2, 'AHHHH', tutorialTextStyle)
 
-        this.gotoMenu = new MenuButton(scene, GAME_W / 2, GAME_H - 80, 'back', itemStyle)
+
 
         for (let obj of [tutorialFrame, this.fwdArrow, this.revArrow]) {
             obj.setScale(SF, SF)
@@ -51,7 +51,6 @@ export class Tutorial extends Phaser.GameObjects.Container {
             this.add(obj)
         }
 
-        this.add(this.gotoMenu)
         this.add(this.tutorialText)
         this.add(this.tutorialImage)
 
