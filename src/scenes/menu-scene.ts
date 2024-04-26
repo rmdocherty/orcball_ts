@@ -3,6 +3,7 @@ import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES } from '../interfaces/shared'
 import { MenuButton, itemStyle, } from '../objects/button';
 import { Tutorial } from '../objects/tutorial';
 
+// change audio to not be .ogg to fix mobile crashes
 
 let characterBios = require('/assets/data.json')
 
@@ -111,7 +112,7 @@ export class MenuScene extends Phaser.Scene {
     }
 
     preloadAudio(): void {
-        this.load.audio('main_music', './assets/music/embark.ogg')
+        this.load.audio('main_music', './assets/music/embark.mp3')
         const fnames = ["ability_used", "accept", "invalid", "kick1", "kick2", "kick3", "mage_ability", "orc_ability", "ranger_ability", "warrior_ability", "win"]
         for (let fname of fnames) {
             this.load.audio(fname, './assets/music/' + fname + ".wav")
