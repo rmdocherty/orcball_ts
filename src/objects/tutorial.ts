@@ -85,7 +85,6 @@ export class Tutorial extends Phaser.GameObjects.Container {
         this.pageNumber = newN
         this.tutorialText.setText(tutorialText[newN])
         this.tutorialImage.setTexture("t" + (newN + 1).toString())
-        console.log(newN)
     }
 
     private onPointerOver(i: number): void {

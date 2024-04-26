@@ -3,7 +3,7 @@ import { GraphicDot } from '../objects/dots';
 import { AbilityButton, MenuButton, itemStyle } from '../objects/button';
 import { Ball } from '../objects/ball';
 import { LogicGame, } from '../logic/board';
-import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES, GameStart } from '../interfaces/shared';
+import { Dot, Point, toGfxPos, WinState, Colours, Link, Player, Character, CHAR_NAMES, DOT_NAMES, GameStart, MPConnection } from '../interfaces/shared';
 import { DOT_SIZE, LINE_WIDTH, valToCol, GAME_H, GAME_W, BANNER_H, SF } from '../interfaces/shared';
 import { i_to_p, p_to_i, colourEnumToPhaserColor } from "../interfaces/shared";
 import { X_LHS } from './menu-scene';
@@ -45,19 +45,25 @@ export class GameScene extends Phaser.Scene {
   private muted: boolean
   private music: Phaser.Sound.BaseSound
 
+  private mpConnection: MPConnection
+  private isOnline: boolean
+
   constructor() {
     super({ key: 'GameScene' });
   }
 
   init(data: GameStart) {
+    this.isOnline = false
     this.logicGame = new LogicGame(11, 9, data.p1, data.p2);
+    this.mpConnection = data.mpConnection
+    this.mpConnection.abilityFn = this.setAbilityActiveTrue.bind(this)
+    this.mpConnection.moveFn = this.onlineMoveWrapper.bind(this)
+    this.isOnline = (this.mpConnection.peerid != null) && (this.mpConnection.mode == "online")
   }
 
   preload(): void { // load my assets in here later
 
   }
-
-
 
   create(): void {
     this.validMoves = []
@@ -105,6 +111,32 @@ export class GameScene extends Phaser.Scene {
   }
 
   // ============ GAME LOGIC ===========
+
+  makeMove(ballPoint: Point, queryPoint: Point, sentOnline: boolean = false) {
+    // if ability has been clicked, use that player's character to make logic move
+    const lg = this.logicGame
+    const details = [lg.p1Details, lg.p2Details][lg.player]
+    const char = (this.abilityActive) ? details.character : Character.NONE
+
+    if (this.isOnline && (this.mpConnection.whichPlayer != lg.player) && !(sentOnline)) { //can't move if not your turn
+      return
+    }
+
+    const summary = this.logicGame.makeMove(ballPoint, queryPoint, char)
+    if (summary.moveOver == true) {
+      const newPlayer = this.logicGame.player
+      const bannerName = ['banner_1', 'banner_2']
+      this.playerBanner.setTexture(bannerName[newPlayer])
+    }
+
+    this.winState = summary.winState
+    this.handleMoveEnd(ballPoint, queryPoint)
+  }
+
+  onlineMoveWrapper(queryPoint: Point) {
+    this.makeMove(this.logicGame.ballPos, queryPoint, true)
+  }
+
   handleMoveEnd(start: Point, end: Point): void {
     this.hideTempLine()
     this.abilityActive = false
@@ -123,8 +155,8 @@ export class GameScene extends Phaser.Scene {
 
     const validMoves = this.logicGame.getValidMoves(ballPos, Character.NONE);
     this.validMoves = validMoves;
-    this.setHighlightValidMoves(validMoves, true);
 
+    this.setHighlightValidMoves(validMoves, true);
     this.updatePlayers(this.logicGame.player);
   }
 
@@ -142,11 +174,21 @@ export class GameScene extends Phaser.Scene {
     btns[player].turnMatches = true
     btns[1 - player].turnMatches = false
 
+    if (this.isOnline) { // force opponent button to be invalid
+      const yourPlayer = this.mpConnection.whichPlayer
+      btns[1 - yourPlayer].turnMatches = false
+    }
+
     const lg = this.logicGame
     const details = [lg.p1Details, lg.p2Details]
     for (let i = 0; i < 2; i++) {
       btns[i].setAvailable(details[i].movesBeforeCooldown)
     }
+  }
+
+  setAbilityActiveTrue(): void {
+    this.abilityActive = true
+    this.updateOnAbilityPress()
   }
 
   updateOnAbilityPress(): void {
@@ -205,6 +247,11 @@ export class GameScene extends Phaser.Scene {
   onDotHover(dot: GraphicDot): void {
     const ballPoint = this.logicGame.ballPos;
     const queryPoint = dot.logicPos;
+
+    if (this.isOnline && this.mpConnection.whichPlayer != this.logicGame.player) { //can't move if not your turn
+      return
+    }
+
     if (this.checkPointValid(queryPoint)) {
       dot.grow();
       this.drawTempLine(ballPoint, queryPoint);
@@ -222,29 +269,19 @@ export class GameScene extends Phaser.Scene {
     if (!this.checkPointValid(queryPoint)) {
       return
     }
-
-    // if ability has been clicked, use that player's character to make logic move
-    const lg = this.logicGame
-    const details = [lg.p1Details, lg.p2Details][lg.player]
-    const char = (this.abilityActive) ? details.character : Character.NONE
-
-    const summary = this.logicGame.makeMove(ballPoint, queryPoint, char)
-    if (summary.moveOver == true) {
-      const newPlayer = this.logicGame.player
-      const newColourHex = (newPlayer == Player.P1) ? Colours.P1_COL : Colours.P2_COL
-      const newColour = colourEnumToPhaserColor(newColourHex)
-      const bannerName = ['banner_1', 'banner_2']
-      this.playerBanner.setTexture(bannerName[newPlayer])
-      //this.playerBanner.fillColor = newColour
+    if (this.isOnline && (this.mpConnection.whichPlayer == this.logicGame.player)) {
+      const xStr = queryPoint.x.toString()
+      const yStr = queryPoint.y.toString()
+      this.mpConnection.conn.send("move:x" + xStr + "_" + "y" + yStr)
     }
-
-    this.winState = summary.winState
-    this.handleMoveEnd(ballPoint, queryPoint)
+    this.makeMove(ballPoint, queryPoint)
   }
 
   onButtonPress(): void {
-    this.abilityActive = true
-    this.updateOnAbilityPress()
+    this.setAbilityActiveTrue()
+    if (this.isOnline) {
+      this.mpConnection.conn.send("ability:")
+    }
   }
 
 
@@ -326,6 +363,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   setHighlightValidMoves(validMoves: Point[], on: boolean = true): void {
+
+    if (this.isOnline && this.mpConnection.whichPlayer != this.logicGame.player) { //can't move if not your turn
+      return
+    }
+
     for (let p of validMoves) {
       const idx = p_to_i(p, this.logicGame.grid.w);
       if (on) {

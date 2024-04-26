@@ -1,5 +1,5 @@
 import { wrap } from 'module';
-import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES, Player, Character } from '../interfaces/shared';
+import { GAME_H, GAME_W, SF, CHAR_NAMES, DOT_NAMES, Player, Character, Point, MPConnection } from '../interfaces/shared';
 import { MenuButton, itemStyle, } from '../objects/button';
 import { Tutorial } from '../objects/tutorial';
 
@@ -19,13 +19,6 @@ const rand = (l: number): number => { return Math.floor(Math.random() * l) }
 //let peer: Peer = null;
 //let conn: DataConnection = null;
 
-interface MPConnection {
-    peer: Peer,
-    id: string,
-    conn: DataConnection | null,
-    peerid: string,
-    whichPlayer: Player
-}
 
 
 interface Bio {
@@ -264,6 +257,7 @@ export class MenuScene extends Phaser.Scene {
         this.setMenuVis(false)
         this.setCharSelect(true)
         this.initAnims()
+        this.mpConnection.mode = "local"
     }
 
     loadOnline() {
@@ -272,8 +266,7 @@ export class MenuScene extends Phaser.Scene {
         this.sound.play('accept')
         this.backButton.visible = true
         this.setMenuVis(false)
-        this.setCharSelect(false)
-        this.initAnims()
+        this.mpConnection.mode = "online"
     }
 
     // ============ CHARACTER SELECT ===========
@@ -309,7 +302,7 @@ export class MenuScene extends Phaser.Scene {
     onConfirmDown() {
         const i = this.selectedCharIdx
 
-        const isOnline = (this.mpConnection.peerid != null)
+        const isOnline = (this.mpConnection.peerid != null) && (this.mpConnection.mode == "online")
         if (this.selectedChars.length == 1 && isOnline) {
             return; // don't set opponent
         }
@@ -334,7 +327,7 @@ export class MenuScene extends Phaser.Scene {
         this.selectedChars[player] = char
 
         if ((this.selectedChars[0] != Character.NONE) && (this.selectedChars[1] != Character.NONE)) {
-            this.scene.start('GameScene', { p1: this.selectedChars[0], p2: this.selectedChars[1] })
+            this.scene.start('GameScene', { p1: this.selectedChars[0], p2: this.selectedChars[1], mpConnection: this.mpConnection })
         }
     }
 
@@ -381,7 +374,7 @@ export class MenuScene extends Phaser.Scene {
                 this.handleMPData(data);
             });
         })
-        this.mpConnection = { peer: peer, id: id, conn: null, peerid: "", whichPlayer: Player.P1 }
+        this.mpConnection = { peer: peer, id: id, conn: null, peerid: "", whichPlayer: Player.P1, moveFn: null, abilityFn: null, mode: "local" }
     }
 
     checkMultiplayer(): void {
@@ -392,6 +385,7 @@ export class MenuScene extends Phaser.Scene {
         if (wantsConnect) {
             const peerid = urlSplit[n].slice(1)
             console.log(peerid)
+            this.mpConnection.mode = "online"
             const conn = this.mpConnection.peer.connect(peerid) // peerid
             conn.on('open', () => {
                 conn.send("id:" + this.mpConnection.id)
@@ -422,6 +416,17 @@ export class MenuScene extends Phaser.Scene {
             const otherChar = parseInt(getData(data))
             this.updateCharSelect(1 - this.mpConnection.whichPlayer, otherChar)
             //handle char select
+        } else if (data.includes("ability:")) {
+            this.mpConnection.abilityFn()
+        } else if (data.includes("move:")) {
+            const moveStr = getData(data)
+            //console.log(moveStr)
+            const [xStr, yStr] = moveStr.split("_")
+            const x = parseInt(xStr.slice(1))
+            const y = parseInt(yStr.slice(1))
+            const queryPoint: Point = { x: x, y: y }
+            console.log(queryPoint)
+            this.mpConnection.moveFn(queryPoint)
         }
     }
 

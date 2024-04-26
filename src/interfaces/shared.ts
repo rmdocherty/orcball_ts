@@ -16,6 +16,8 @@ export const SF = 6
 
 export const DOT_SIZE = 5 * SF//20
 
+import { Peer, DataConnection } from "peerjs"
+
 export interface Point {
     x: number;
     y: number
@@ -111,9 +113,22 @@ export interface ImageConstructor {
     frame?: string | number;
 }
 
+export interface MPConnection {
+    peer: Peer,
+    id: string,
+    conn: DataConnection | null,
+    peerid: string,
+    whichPlayer: Player
+    moveFn: ((x: Point) => void) | null
+    abilityFn: (() => void) | null
+    mode: "online" | "local"
+}
+
+
 export interface GameStart {
     p1: Character,
-    p2: Character
+    p2: Character,
+    mpConnection: MPConnection
 }
 
 
